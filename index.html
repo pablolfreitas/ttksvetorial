@@ -50,50 +50,52 @@
           <label>Cidade</label>
           <select id="cidade">
             <option value=""></option>
-            <option>Alegrete</option>
-            <option>Bagé</option>
-            <option>Cachoeira do Sul</option>
-            <option>Camaquã</option>
-            <option>Canela</option>
-            <option>Capão da Canoa</option>
-            <option>Carlos Barbosa</option>
-            <option>Carazinho</option>
-            <option>Charqueadas</option>
-            <option>Dois Irmãos</option>
-            <option>Erechim</option>
-            <option>Estrela</option>
-            <option>Flores da Cunha</option>
-            <option>Garibaldi</option>
-            <option>Gramado</option>
-            <option>Igrejinha</option>
-            <option>Ijui</option>
-            <option>Ivoti</option>
-            <option>Lagoa Vermelha</option>
-            <option>Lajeado</option>
-            <option>Nova Petrópolis</option>
-            <option>Osório</option>
-            <option>Palmeira das Missões</option>
-            <option>Santa Rosa</option>
-            <option>Santana do Livramento</option>
-            <option>Santo Angelo</option>
-            <option>São Marcos</option>
-            <option>Sarandi</option>
-            <option>Taquara</option>
-            <option>Teutonia</option>
-            <option>Torres</option>
-            <option>Tramandai</option>
-            <option>Três de Maio</option>
-            <option>Uruguaiana</option>
-            <option>Vacaria</option>
-            <option>Venancio Aires</option>
-            <option>Veranopolis</option>
-            <option>Xangri-lá</option>
-            <option>Guaíba</option>
+            <!-- NORTE -->
+            <option value="Carazinho"      data-sigla="CIO" data-grupo="NORTE">Carazinho</option>
+            <option value="Cachoeira do Sul" data-sigla="CCR" data-grupo="NORTE">Cachoeira do Sul</option>
+            <option value="Erechim"        data-sigla="ERE" data-grupo="NORTE">Erechim</option>
+            <option value="Palmeira das Missões" data-sigla="PMM" data-grupo="NORTE">Palmeira das Missões</option>
+            <option value="Santa Rosa"     data-sigla="SRO" data-grupo="NORTE">Santa Rosa</option>
+            <option value="Santo Angelo"   data-sigla="SAN" data-grupo="NORTE">Santo Angelo</option>
+            <option value="Sarandi"        data-sigla="SRD" data-grupo="NORTE">Sarandi</option>
+            <option value="Três de Maio"   data-sigla="TMI" data-grupo="NORTE">Três de Maio</option>
+            <!-- SUL -->
+            <option value="Alegrete"       data-sigla="ALG" data-grupo="SUL">Alegrete</option>
+            <option value="Bagé"           data-sigla="BGE" data-grupo="SUL">Bagé</option>
+            <option value="Camaquã"        data-sigla="CAM" data-grupo="SUL">Camaquã</option>
+            <option value="Santana do Livramento" data-sigla="SIV" data-grupo="SUL">Santana do Livramento</option>
+            <option value="Uruguaiana"     data-sigla="UGN" data-grupo="SUL">Uruguaiana</option>
+            <!-- SERRA -->
+            <option value="Canela"         data-sigla="CEN" data-grupo="SERRA">Canela</option>
+            <option value="Capão da Canoa" data-sigla="KDK" data-grupo="SERRA">Capão da Canoa</option>
+            <option value="Carlos Barbosa" data-sigla="CLB" data-grupo="SERRA">Carlos Barbosa</option>
+            <option value="Dois Irmãos"    data-sigla="DSR" data-grupo="SERRA">Dois Irmãos</option>
+            <option value="Flores da Cunha" data-sigla="FCA" data-grupo="SERRA">Flores da Cunha</option>
+            <option value="Garibaldi"      data-sigla="GRD" data-grupo="SERRA">Garibaldi</option>
+            <option value="Gramado"        data-sigla="GDO" data-grupo="SERRA">Gramado</option>
+            <option value="Igrejinha"      data-sigla="IJH" data-grupo="SERRA">Igrejinha</option>
+            <option value="Ivoti"          data-sigla="IVO" data-grupo="SERRA">Ivoti</option>
+            <option value="Lagoa Vermelha" data-sigla="LVH" data-grupo="SERRA">Lagoa Vermelha</option>
+            <option value="Nova Petrópolis" data-sigla="NVP" data-grupo="SERRA">Nova Petrópolis</option>
+            <option value="Osório"         data-sigla="OSR" data-grupo="SERRA">Osório</option>
+            <option value="São Marcos"     data-sigla="SCS" data-grupo="SERRA">São Marcos</option>
+            <option value="Taquara"        data-sigla="TQR" data-grupo="SERRA">Taquara</option>
+            <option value="Torres"         data-sigla="TES" data-grupo="SERRA">Torres</option>
+            <option value="Tramandaí"      data-sigla="TRI" data-grupo="SERRA">Tramandaí</option>
+            <option value="Vacaria"        data-sigla="VAA" data-grupo="SERRA">Vacaria</option>
+            <option value="Veranópolis"    data-sigla="VNS" data-grupo="SERRA">Veranópolis</option>
+            <option value="Xangri-lá"      data-sigla="XNLA" data-grupo="SERRA">Xangri-lá</option>
+            <!-- TAQUARI -->
+            <option value="Charqueadas"    data-sigla="CQU" data-grupo="TAQUARI">Charqueadas</option>
+            <option value="Estrela"        data-sigla="ETA" data-grupo="TAQUARI">Estrela</option>
+            <option value="Lajeado"        data-sigla="LJO" data-grupo="TAQUARI">Lajeado</option>
+            <option value="Teutonia"       data-sigla="TUN" data-grupo="TAQUARI">Teutonia</option>
+            <option value="Venancio Aires" data-sigla="VAI" data-grupo="TAQUARI">Venancio Aires</option>
           </select>
         </div>
         <div class="field">
           <label>Sigla</label>
-          <input type="text" id="sigla" placeholder="GBA" maxlength="5">
+          <input type="text" id="sigla" placeholder="—" maxlength="5" readonly style="opacity:0.7;cursor:default;">
         </div>
       </div>
 
