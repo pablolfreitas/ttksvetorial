@@ -10,8 +10,8 @@ function mostrarAlerta(msg, erro = false) {
 
 // Auto-fill sigla e grupo ao selecionar cidade
 document.getElementById("cidade").addEventListener("change", function () {
-  const selected = this.options[this.selectedIndex];
-  document.getElementById("sigla").value = selected.dataset.sigla || "";
+  const sel = this.options[this.selectedIndex];
+  document.getElementById("sigla").value = sel.dataset.sigla || "";
 });
 
 // Pré-preenche data/hora atual
@@ -22,16 +22,17 @@ function setDataAtual() {
 }
 setDataAtual();
 
-// Gera link do Google Maps
+// Gera link Google Maps
 function gerarMaps(rua, bairro, cidade) {
   if (!rua && !bairro && !cidade) return "";
-  const end = encodeURIComponent(`${rua}, ${bairro}, ${cidade}`);
-  return `https://www.google.com/maps/search/?api=1&query=${end}`;
+  return "https://www.google.com/maps/search/?api=1&query=" +
+    encodeURIComponent(`${rua}, ${bairro}, ${cidade}`);
 }
 
-// Gera a máscara formatada igual ao print
+// Gera máscara formatada
 function gerarMascara(d) {
   const maps = gerarMaps(d.rua, d.bairro, d.cidade);
+  const obs  = d.obs ? `\nObs: ${d.obs}` : "\nObs:";
   return `TTK: ${d.ttk}
 ID Serviço: ${d.id_servico}
 Causa Raiz:
@@ -45,8 +46,7 @@ Bairro: ${d.bairro}
 Cidade: ${d.cidade}
 Localização: ${maps}
 Data Inicio: ${d.data_inicio_fmt}
-Data Fim:
-Obs:
+Data Fim:${obs}
 
 
 SLA:
@@ -76,14 +76,13 @@ document.getElementById("btn-limpar").addEventListener("click", () => {
 document.getElementById("btn-copiar").addEventListener("click", () => {
   const txt = document.getElementById("mascara-texto");
   if (!txt.value) return;
-  txt.select();
-  txt.setSelectionRange(0, 99999);
-  navigator.clipboard.writeText(txt.value).then(() => {
-    mostrarAlerta("✅ Máscara copiada!");
-  }).catch(() => {
-    document.execCommand("copy");
-    mostrarAlerta("✅ Máscara copiada!");
-  });
+  navigator.clipboard.writeText(txt.value)
+    .then(() => mostrarAlerta("✅ Máscara copiada!"))
+    .catch(() => {
+      txt.select();
+      document.execCommand("copy");
+      mostrarAlerta("✅ Máscara copiada!");
+    });
 });
 
 // Submit
@@ -104,9 +103,8 @@ document.getElementById("form-ticket").addEventListener("submit", async (e) => {
 
   const cidadeSelect = document.getElementById("cidade");
   const cidadeOpt    = cidadeSelect.options[cidadeSelect.selectedIndex];
+  const dataRaw      = document.getElementById("data_inicio").value;
 
-  // Formata data para exibição na máscara
-  const dataRaw = document.getElementById("data_inicio").value;
   let dataFmt = "";
   if (dataRaw) {
     const d = new Date(dataRaw);
@@ -115,25 +113,25 @@ document.getElementById("form-ticket").addEventListener("submit", async (e) => {
   }
 
   const dados = {
-    ttk:          document.getElementById("ttk").value.trim(),
-    id_servico:   document.getElementById("id_servico").value.trim(),
-    ard:          document.getElementById("ard").value.trim(),
-    sp:           document.getElementById("sp").value.trim(),
-    cto:          document.getElementById("cto").value.trim(),
-    clientes:     document.getElementById("clientes").value.trim(),
-    rua:          document.getElementById("rua").value.trim(),
-    bairro:       document.getElementById("bairro").value.trim(),
-    cidade:       cidadeSelect.value,
-    sigla:        document.getElementById("sigla").value.trim().toUpperCase(),
-    tag:          tag.value,
-    regiao:       document.getElementById("regiao").value.trim(),
-    grupo_regiao: cidadeOpt.dataset.grupo || "SUL",
-    data_inicio:  dataRaw || null,
+    ttk:             document.getElementById("ttk").value.trim(),
+    id_servico:      document.getElementById("id_servico").value.trim(),
+    ard:             document.getElementById("ard").value.trim(),
+    sp:              document.getElementById("sp").value.trim(),
+    cto:             document.getElementById("cto").value.trim(),
+    clientes:        document.getElementById("clientes").value.trim(),
+    rua:             document.getElementById("rua").value.trim(),
+    bairro:          document.getElementById("bairro").value.trim(),
+    cidade:          cidadeSelect.value,
+    sigla:           document.getElementById("sigla").value.trim().toUpperCase(),
+    tag:             tag.value,
+    regiao:          document.getElementById("regiao").value.trim(),
+    obs:             document.getElementById("obs").value.trim(),
+    grupo_regiao:    cidadeOpt.dataset.grupo || "SUL",
+    data_inicio:     dataRaw || null,
     data_inicio_fmt: dataFmt,
-    atualizado_em: new Date().toISOString(),
+    atualizado_em:   new Date().toISOString(),
   };
 
-  // Payload para o Supabase (só os campos da tabela)
   const payload = {
     ttk:          dados.ttk,
     id_servico:   dados.id_servico,
@@ -164,7 +162,6 @@ document.getElementById("form-ticket").addEventListener("submit", async (e) => {
       throw new Error(err.message || "Erro ao salvar");
     }
 
-    // Gera e exibe a máscara
     document.getElementById("mascara-texto").value = gerarMascara(dados);
     mostrarAlerta("✅ Ticket salvo! Máscara gerada.");
 
