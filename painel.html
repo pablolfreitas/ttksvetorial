@@ -17,31 +17,21 @@
 
   <main class="container-wide">
     <div class="painel-header">
-      <div class="filtros">
-        <select id="filtro-tag">
-          <option value="">Todas as TAGs</option>
-          <option value="Massiva">Massiva</option>
-          <option value="NOC">NOC</option>
-          <option value="Pendência Técnica">Pendência Técnica</option>
-        </select>
-        <input type="text" id="filtro-busca" placeholder="🔍 Buscar TTK, cidade...">
-      </div>
       <div class="painel-acoes">
         <button id="btn-atualizar" class="btn-secondary">🔄 Atualizar</button>
         <span id="ultima-atualizacao" class="info-text"></span>
       </div>
     </div>
 
-    <!-- Tabela agrupada por grupo de região -->
     <div id="tabela-wrapper">
       <div class="loading">Carregando tickets...</div>
     </div>
   </main>
 
-  <!-- Modal editar região -->
+  <!-- Modal editar descrição -->
   <div id="modal-regiao" class="modal hidden">
     <div class="modal-content">
-      <h3>✏️ Editar Região</h3>
+      <h3>✏️ Editar Descrição</h3>
       <p class="modal-info">TTK: <strong id="modal-ttk"></strong></p>
       <textarea id="modal-texto" rows="4" placeholder="Informe a situação atual..."></textarea>
       <div class="modal-actions">
