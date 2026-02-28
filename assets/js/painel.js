@@ -1,248 +1,309 @@
-// ===== painel.js =====
+/* ===== RESET & BASE ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-const ORDEM_REGIOES = ["NORTE", "SUL", "SERRA", "TAQUARI"];
-
-let todosTickets = [];
-let ticketEditando = null;
-let ticketDeletando = null;
-
-// ===== FETCH =====
-async function carregarTickets() {
-  try {
-    const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/tickets?select=*&order=data_inicio.asc`,
-      { headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}` } }
-    );
-    if (!res.ok) throw new Error("Erro ao buscar tickets");
-    todosTickets = await res.json();
-    renderTabela();
-    document.getElementById("ultima-atualizacao").textContent =
-      "Atualizado às " + new Date().toLocaleTimeString("pt-BR");
-  } catch (err) {
-    document.getElementById("tabela-wrapper").innerHTML =
-      `<div class="loading" style="color:#e74c3c;">❌ ${err.message}<br><br>Verifique as credenciais no supabase-config.js</div>`;
-  }
+:root {
+  --bg: #1a1a2e;
+  --bg2: #16213e;
+  --bg3: #0f3460;
+  --verde: #1a5c38;
+  --verde-claro: #2d8a57;
+  --texto: #e0e0e0;
+  --texto-dim: #9090a8;
+  --borda: #2a4a6a;
+  --danger: #c0392b;
+  --tag-massiva: #e67e22;
+  --tag-pendencia: #8e44ad;
+  --region-header: #1e3a5a;
 }
 
-// ===== RENDER =====
-function renderTabela() {
-  const grupos = {};
-  ORDEM_REGIOES.forEach(r => { grupos[r] = []; });
-
-  todosTickets.forEach(t => {
-    const grupo = (t.grupo_regiao || "SUL").toUpperCase();
-    if (!grupos[grupo]) grupos[grupo] = [];
-    grupos[grupo].push(t);
-  });
-
-  const wrapper = document.getElementById("tabela-wrapper");
-  wrapper.innerHTML = "";
-
-  // Cabeçalho fixo único
-  wrapper.insertAdjacentHTML("beforeend", `
-    <table class="tickets-table" style="margin-bottom:0; table-layout:fixed; width:100%;">
-      <colgroup>
-        <col style="width:160px">
-        <col style="width:210px">
-        <col style="width:70px">
-        <col><!-- descrição ocupa o resto -->
-        <col style="width:160px">
-        <col style="width:130px">
-        <col style="width:60px">
-        <col style="width:120px">
-        <col style="width:160px">
-        <col style="width:42px">
-      </colgroup>
-      <thead>
-        <tr>
-          <th>TTKs</th>
-          <th>ID de Serviço</th>
-          <th>SP</th>
-          <th>Descrição</th>
-          <th>Atualização</th>
-          <th>Cidade</th>
-          <th>Sigla</th>
-          <th>TAG</th>
-          <th>Dat. Início</th>
-          <th></th>
-        </tr>
-      </thead>
-    </table>`);
-
-  Object.entries(grupos).forEach(([nomeGrupo, lista]) => {
-    const div = document.createElement("div");
-    div.className = "grupo-regiao";
-
-    const titulo = document.createElement("div");
-    titulo.className = "grupo-titulo";
-    titulo.textContent = nomeGrupo;
-    div.appendChild(titulo);
-
-    const table = document.createElement("table");
-    table.className = "tickets-table";
-    table.style.cssText = "table-layout:fixed; width:100%;";
-    table.innerHTML = `
-      <colgroup>
-        <col style="width:160px">
-        <col style="width:210px">
-        <col style="width:70px">
-        <col>
-        <col style="width:160px">
-        <col style="width:130px">
-        <col style="width:60px">
-        <col style="width:120px">
-        <col style="width:160px">
-        <col style="width:42px">
-      </colgroup>`;
-
-    const tbody = document.createElement("tbody");
-
-    if (lista.length === 0) {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `<td colspan="10" class="sem-tickets">—</td>`;
-      tbody.appendChild(tr);
-    } else {
-      lista.forEach(t => {
-        const tagClass = t.tag === "Massiva" ? "tag-Massiva" : "tag-pendencia";
-        const dataAtual  = t.atualizado_em ? formatarData(t.atualizado_em) : "—";
-        const dataInicio = t.data_inicio   ? formatarData(t.data_inicio)   : "—";
-        const descHtml   = (t.regiao || "—").replace(/\n/g, "<br>");
-
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td class="cell-mono">${t.ttk || "—"}</td>
-          <td class="cell-mono">${t.id_servico || "—"}</td>
-          <td class="cell-center">${t.sp || "—"}</td>
-          <td class="col-descricao">
-            <span class="descricao-texto">${descHtml}</span>
-            <button class="btn-edit-desc" data-id="${t.id}" title="Editar descrição">✏️</button>
-          </td>
-          <td>${dataAtual}</td>
-          <td>${t.cidade || "—"}</td>
-          <td class="cell-center">${t.sigla || "—"}</td>
-          <td><span class="tag-badge ${tagClass}">${t.tag || "—"}</span></td>
-          <td>${dataInicio}</td>
-          <td><button class="btn-delete" data-id="${t.id}" data-ttk="${t.ttk}" title="Apagar">🗑️</button></td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    table.appendChild(tbody);
-    div.appendChild(table);
-    wrapper.appendChild(div);
-  });
-
-  wrapper.querySelectorAll(".btn-edit-desc").forEach(btn => {
-    btn.addEventListener("click", () => abrirModalDescricao(btn.dataset.id));
-  });
-  wrapper.querySelectorAll(".btn-delete").forEach(btn => {
-    btn.addEventListener("click", () => abrirModalDelete(btn.dataset.id, btn.dataset.ttk));
-  });
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--texto);
+  min-height: 100vh;
+  font-size: 14px;
 }
 
-// ===== FORMATAÇÃO =====
-function formatarData(iso) {
-  if (!iso) return "—";
-  const d = new Date(iso);
-  return d.toLocaleDateString("pt-BR") + " " +
-    d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+/* ===== HEADER ===== */
+header {
+  background: var(--verde);
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2px solid var(--verde-claro);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+header h1 { font-size: 1.1rem; font-weight: 600; }
+
+nav { display: flex; gap: 10px; }
+.nav-btn {
+  padding: 5px 14px;
+  border-radius: 6px;
+  text-decoration: none;
+  color: #cce8d8;
+  font-size: 0.85rem;
+  transition: background 0.2s;
+}
+.nav-btn:hover, .nav-btn.active {
+  background: rgba(255,255,255,0.15);
+  color: white;
 }
 
-// ===== MODAL EDITAR DESCRIÇÃO =====
-function abrirModalDescricao(id) {
-  ticketEditando = todosTickets.find(t => t.id == id);
-  if (!ticketEditando) return;
-  document.getElementById("modal-ttk").textContent = ticketEditando.ttk;
-  document.getElementById("modal-texto").value = ticketEditando.regiao || "";
-  document.getElementById("modal-regiao").classList.remove("hidden");
-  document.getElementById("modal-texto").focus();
+/* ===== CONTAINERS ===== */
+.container {
+  max-width: 760px;
+  margin: 24px auto;
+  padding: 0 16px;
+}
+.container-wide {
+  max-width: 1400px;
+  margin: 20px auto;
+  padding: 0 20px;
 }
 
-document.getElementById("modal-cancelar").addEventListener("click", () => {
-  document.getElementById("modal-regiao").classList.add("hidden");
-  ticketEditando = null;
-});
-
-document.getElementById("modal-salvar").addEventListener("click", async () => {
-  if (!ticketEditando) return;
-  const novoTexto = document.getElementById("modal-texto").value.trim();
-  const btn = document.getElementById("modal-salvar");
-  btn.disabled = true;
-
-  try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/tickets?id=eq.${ticketEditando.id}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        "apikey": SUPABASE_KEY,
-        "Authorization": `Bearer ${SUPABASE_KEY}`,
-        "Prefer": "return=minimal"
-      },
-      body: JSON.stringify({ regiao: novoTexto, atualizado_em: new Date().toISOString() })
-    });
-    if (!res.ok) throw new Error("Erro ao atualizar");
-
-    const idx = todosTickets.findIndex(t => t.id == ticketEditando.id);
-    if (idx >= 0) {
-      todosTickets[idx].regiao = novoTexto;
-      todosTickets[idx].atualizado_em = new Date().toISOString();
-    }
-    document.getElementById("modal-regiao").classList.add("hidden");
-    ticketEditando = null;
-    renderTabela();
-    mostrarAlerta("✅ Descrição atualizada!");
-  } catch (err) {
-    mostrarAlerta("❌ " + err.message, true);
-  } finally {
-    btn.disabled = false;
-  }
-});
-
-// ===== MODAL DELETAR =====
-function abrirModalDelete(id, ttk) {
-  ticketDeletando = id;
-  document.getElementById("delete-ttk").textContent = ttk;
-  document.getElementById("modal-delete").classList.remove("hidden");
+/* ===== FORMULÁRIO ===== */
+form {
+  background: var(--bg2);
+  border: 1px solid var(--borda);
+  border-radius: 10px;
+  padding: 22px;
 }
 
-document.getElementById("delete-cancelar").addEventListener("click", () => {
-  document.getElementById("modal-delete").classList.add("hidden");
-  ticketDeletando = null;
-});
-
-document.getElementById("delete-confirmar").addEventListener("click", async () => {
-  if (!ticketDeletando) return;
-  const btn = document.getElementById("delete-confirmar");
-  btn.disabled = true;
-  try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/tickets?id=eq.${ticketDeletando}`, {
-      method: "DELETE",
-      headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}` }
-    });
-    if (!res.ok) throw new Error("Erro ao deletar");
-    todosTickets = todosTickets.filter(t => t.id != ticketDeletando);
-    document.getElementById("modal-delete").classList.add("hidden");
-    ticketDeletando = null;
-    renderTabela();
-    mostrarAlerta("🗑️ Ticket removido.");
-  } catch (err) {
-    mostrarAlerta("❌ " + err.message, true);
-  } finally {
-    btn.disabled = false;
-  }
-});
-
-// ===== ALERTA =====
-function mostrarAlerta(msg, erro = false) {
-  const el = document.getElementById("alerta");
-  el.textContent = msg;
-  el.className = "alerta" + (erro ? " erro" : "");
-  el.classList.remove("hidden");
-  setTimeout(() => el.classList.add("hidden"), 4000);
+.form-row {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
 }
 
-document.getElementById("btn-atualizar").addEventListener("click", carregarTickets);
+.field {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 150px;
+}
+.field-wide { flex: 2.5; }
+.field-sm   { flex: 0.5; min-width: 80px; }
 
-carregarTickets();
-setInterval(carregarTickets, 30000);
+label {
+  font-size: 0.72rem;
+  color: var(--texto-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 5px;
+  font-weight: 600;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="datetime-local"],
+select,
+textarea {
+  background: var(--bg3);
+  border: 1px solid var(--borda);
+  border-radius: 6px;
+  color: var(--texto);
+  padding: 8px 10px;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.2s;
+  width: 100%;
+  font-family: inherit;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--verde-claro);
+}
+
+.tags-group {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+.tag-option {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+  color: var(--texto);
+  text-transform: none;
+  letter-spacing: 0;
+  cursor: pointer;
+  font-weight: 400;
+}
+.tag-option input { width: auto; cursor: pointer; }
+
+.form-actions { display: flex; gap: 10px; margin-top: 6px; }
+
+/* ===== BOTÕES ===== */
+.btn-primary, .btn-secondary, .btn-danger {
+  padding: 8px 18px;
+  border-radius: 6px;
+  border: none;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.1s;
+  font-family: inherit;
+}
+.btn-primary:hover, .btn-secondary:hover, .btn-danger:hover { opacity: 0.82; }
+.btn-primary:active, .btn-secondary:active { transform: scale(0.98); }
+.btn-primary   { background: var(--verde-claro); color: white; }
+.btn-secondary { background: var(--bg3); color: var(--texto); border: 1px solid var(--borda); }
+.btn-danger    { background: var(--danger); color: white; }
+
+/* ===== ALERTA ===== */
+.alerta {
+  margin-top: 14px;
+  padding: 11px 16px;
+  border-radius: 8px;
+  background: #243a24;
+  border: 1px solid var(--verde-claro);
+  font-size: 0.88rem;
+}
+.alerta.erro { background: #3a1a1a; border-color: var(--danger); }
+.hidden { display: none; }
+
+/* ===== PAINEL HEADER ===== */
+.painel-header {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-bottom: 14px;
+  gap: 12px;
+}
+.painel-acoes { display: flex; align-items: center; gap: 12px; }
+.info-text { font-size: 0.78rem; color: var(--texto-dim); }
+
+/* ===== TABELA ===== */
+.loading { text-align: center; padding: 40px; color: var(--texto-dim); }
+
+.grupo-regiao { margin-bottom: 8px; }
+
+.grupo-titulo {
+  background: var(--region-header);
+  color: white;
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.82rem;
+  letter-spacing: 0.12em;
+  padding: 7px;
+  text-transform: uppercase;
+}
+
+.tickets-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.84rem;
+}
+.tickets-table th {
+  background: #162030;
+  padding: 8px 10px;
+  text-align: left;
+  color: var(--texto-dim);
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.70rem;
+  letter-spacing: 0.07em;
+  white-space: nowrap;
+}
+.tickets-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid #1a2a3a;
+  vertical-align: middle;
+  line-height: 1.45;
+}
+.tickets-table tr:hover td { background: rgba(255,255,255,0.035); }
+
+/* células especiais */
+.cell-mono {
+  font-family: 'Consolas', 'Courier New', monospace;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+.cell-center { text-align: center; }
+
+.col-descricao {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+.descricao-texto {
+  flex: 1;
+  word-break: break-word;
+  line-height: 1.5;
+}
+
+/* tags */
+.tag-badge {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 12px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: white;
+  white-space: nowrap;
+  letter-spacing: 0.03em;
+}
+.tag-Massiva   { background: var(--tag-massiva); }
+.tag-pendencia { background: var(--tag-pendencia); }
+
+/* botões inline tabela */
+.btn-edit-desc {
+  background: none;
+  border: 1px solid var(--borda);
+  color: var(--verde-claro);
+  border-radius: 4px;
+  padding: 2px 7px;
+  font-size: 0.78rem;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.btn-edit-desc:hover { background: rgba(45,138,87,0.15); }
+
+.btn-delete {
+  background: none;
+  border: 1px solid rgba(192,57,43,0.35);
+  color: #e74c3c;
+  border-radius: 4px;
+  padding: 2px 7px;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+.btn-delete:hover { background: rgba(192,57,43,0.15); }
+
+.sem-tickets {
+  text-align: center;
+  padding: 10px;
+  color: var(--texto-dim);
+  font-size: 0.82rem;
+}
+
+/* ===== MODAL ===== */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+}
+.modal.hidden { display: none; }
+.modal-content {
+  background: var(--bg2);
+  border: 1px solid var(--borda);
+  border-radius: 10px;
+  padding: 26px;
+  width: 90%;
+  max-width: 500px;
+}
+.modal-content h3   { margin-bottom: 12px; font-size: 1rem; }
+.modal-info         { font-size: 0.84rem; color: var(--texto-dim); margin-bottom: 10px; }
+.modal-content textarea { margin-bottom: 14px; min-height: 100px; }
+.modal-actions      { display: flex; gap: 10px; }
