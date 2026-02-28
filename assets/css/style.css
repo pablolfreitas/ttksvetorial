@@ -61,6 +61,73 @@ nav { display: flex; gap: 8px; }
 .container      { max-width: 760px; margin: 28px auto; padding: 0 20px; }
 .container-wide { max-width: 1860px; margin: 20px auto; padding: 0 20px; }
 
+/* layout de duas colunas: formulário + máscara */
+.container-form {
+  display: flex;
+  gap: 24px;
+  max-width: 1400px;
+  margin: 24px auto;
+  padding: 0 24px;
+  align-items: flex-start;
+}
+.form-wrapper {
+  flex: 1;
+  min-width: 0;
+}
+.mascara-wrapper {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg2);
+  border: 1px solid var(--borda);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  position: sticky;
+  top: 80px;
+}
+.mascara-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: var(--bg3);
+  border-bottom: 1px solid var(--borda);
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--texto-dim);
+}
+.btn-copiar {
+  background: var(--verde-claro);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 5px 14px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  font-family: inherit;
+}
+.btn-copiar:hover { opacity: 0.85; }
+
+#mascara-texto {
+  flex: 1;
+  width: 100%;
+  min-height: 520px;
+  background: var(--bg2);
+  border: none;
+  color: var(--texto);
+  padding: 16px;
+  font-family: 'Consolas', 'Courier New', monospace;
+  font-size: 0.88rem;
+  line-height: 1.7;
+  resize: none;
+  outline: none;
+}
+#mascara-texto::placeholder { color: var(--texto-dim); font-style: italic; font-family: 'Segoe UI', sans-serif; }
+
 /* ===== FORMULÁRIO ===== */
 form {
   background: var(--bg2);
@@ -126,10 +193,20 @@ input:focus, select:focus, textarea:focus {
 .btn-primary:hover, .btn-secondary:hover, .btn-danger:hover { opacity: 0.85; }
 .btn-primary:active, .btn-secondary:active { transform: scale(0.98); }
 
-/* ===== ALERTA ===== */
+/* alerta fixo no canto inferior */
 .alerta {
-  margin-top: 14px; padding: 11px 16px; border-radius: 8px;
-  background: #1e3a24; border: 1px solid var(--verde-claro); font-size: 0.9rem;
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 300;
+  padding: 12px 24px;
+  border-radius: 8px;
+  background: #1e3a24;
+  border: 1px solid var(--verde-claro);
+  font-size: 0.9rem;
+  white-space: nowrap;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
 }
 .alerta.erro { background: #3a1414; border-color: var(--danger); }
 .hidden { display: none; }
