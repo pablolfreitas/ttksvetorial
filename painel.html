@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel de Tickets</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <header>
+    <h1>📋 Painel de Tickets</h1>
+    <nav>
+      <a href="index.html" class="nav-btn">Abrir Ticket</a>
+      <a href="painel.html" class="nav-btn active">📋 Painel</a>
+    </nav>
+  </header>
+
+  <main class="container-wide">
+    <div class="painel-header">
+      <div class="filtros">
+        <select id="filtro-tag">
+          <option value="">Todas as TAGs</option>
+          <option value="Massiva">Massiva</option>
+          <option value="NOC">NOC</option>
+          <option value="Pendência Técnica">Pendência Técnica</option>
+        </select>
+        <input type="text" id="filtro-busca" placeholder="🔍 Buscar TTK, cidade...">
+      </div>
+      <div class="painel-acoes">
+        <button id="btn-atualizar" class="btn-secondary">🔄 Atualizar</button>
+        <span id="ultima-atualizacao" class="info-text"></span>
+      </div>
+    </div>
+
+    <!-- Tabela agrupada por região -->
+    <div id="tabela-wrapper">
+      <div class="loading">Carregando tickets...</div>
+    </div>
+  </main>
+
+  <!-- Modal editar região -->
+  <div id="modal-regiao" class="modal hidden">
+    <div class="modal-content">
+      <h3>✏️ Editar Região</h3>
+      <p class="modal-info">TTK: <strong id="modal-ttk"></strong></p>
+      <textarea id="modal-texto" rows="4" placeholder="Informe a situação atual..."></textarea>
+      <div class="modal-actions">
+        <button id="modal-salvar" class="btn-primary">💾 Salvar</button>
+        <button id="modal-cancelar" class="btn-secondary">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal confirmar exclusão -->
+  <div id="modal-delete" class="modal hidden">
+    <div class="modal-content">
+      <h3>🗑️ Confirmar exclusão</h3>
+      <p>Deseja apagar o ticket <strong id="delete-ttk"></strong>?</p>
+      <div class="modal-actions">
+        <button id="delete-confirmar" class="btn-danger">Apagar</button>
+        <button id="delete-cancelar" class="btn-secondary">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="alerta" class="alerta hidden"></div>
+
+  <script src="assets/js/supabase-config.js"></script>
+  <script src="assets/js/painel.js"></script>
+</body>
+</html>
