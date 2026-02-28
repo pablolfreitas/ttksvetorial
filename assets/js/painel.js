@@ -40,13 +40,12 @@ function renderTabela() {
 
   const COLGROUP = `
     <colgroup>
-      <col style="width:148px">
-      <col style="width:195px">
-      <col style="width:72px">
+      <col style="width:155px">
+      <col style="width:200px">
+      <col style="width:75px">
       <col><!-- descrição: ocupa todo o espaço restante -->
       <col style="width:138px">
       <col style="width:148px">
-      <col style="width:58px">
       <col style="width:155px">
       <col style="width:138px">
       <col style="width:36px">
@@ -61,7 +60,6 @@ function renderTabela() {
         <th>Descrição</th>
         <th>Atualização</th>
         <th>Cidade</th>
-        <th>Sigla</th>
         <th>TAG</th>
         <th>Dat. Início</th>
         <th></th>
@@ -88,13 +86,12 @@ function renderTabela() {
     table.style.cssText = "table-layout:fixed; width:100%;";
     table.innerHTML = `
       <colgroup>
-        <col style="width:148px">
-        <col style="width:195px">
-        <col style="width:72px">
+        <col style="width:155px">
+        <col style="width:200px">
+        <col style="width:75px">
         <col>
         <col style="width:138px">
         <col style="width:148px">
-        <col style="width:58px">
         <col style="width:155px">
         <col style="width:138px">
         <col style="width:36px">
@@ -104,29 +101,32 @@ function renderTabela() {
 
     if (lista.length === 0) {
       const tr = document.createElement("tr");
-      tr.innerHTML = `<td colspan="10" class="sem-tickets">—</td>`;
+      tr.innerHTML = `<td colspan="9" class="sem-tickets">—</td>`;
       tbody.appendChild(tr);
     } else {
       lista.forEach(t => {
-        const tagClass = t.tag === "Massiva" ? "tag-Massiva" : "tag-pendencia";
+        const tagClass  = t.tag === "Massiva" ? "tag-Massiva" : "tag-pendencia";
         const dataAtual  = t.atualizado_em ? formatarData(t.atualizado_em) : "—";
         const dataInicio = t.data_inicio   ? formatarData(t.data_inicio)   : "—";
         const descHtml   = (t.regiao || "—").replace(/\n/g, "<br>");
 
+        // SP: se tiver mais de 7 caracteres, permite quebra de linha
+        const spVal  = t.sp || "—";
+        const spClass = spVal.length > 7 ? "cell-sp cell-sp-wrap" : "cell-sp";
+
         const tr = document.createElement("tr");
         tr.innerHTML = `
-          <td class="cell-mono">${t.ttk || "—"}</td>
-          <td class="cell-mono">${t.id_servico || "—"}</td>
-          <td class="cell-sp">${t.sp || "—"}</td>
+          <td class="cell-mono cell-center">${t.ttk || "—"}</td>
+          <td class="cell-mono cell-center">${t.id_servico || "—"}</td>
+          <td class="${spClass}">${spVal}</td>
           <td class="col-descricao">
             <span class="descricao-texto">${descHtml}</span>
             <button class="btn-edit-desc" data-id="${t.id}" title="Editar descrição">✏️</button>
           </td>
-          <td>${dataAtual}</td>
-          <td>${t.cidade || "—"}</td>
-          <td class="cell-center">${t.sigla || "—"}</td>
-          <td><span class="tag-badge ${tagClass}">${t.tag || "—"}</span></td>
-          <td>${dataInicio}</td>
+          <td class="cell-center">${dataAtual}</td>
+          <td class="cell-center">${t.cidade || "—"}</td>
+          <td class="cell-center"><span class="tag-badge ${tagClass}">${t.tag || "—"}</span></td>
+          <td class="cell-center">${dataInicio}</td>
           <td><button class="btn-delete" data-id="${t.id}" data-ttk="${t.ttk}" title="Apagar">🗑️</button></td>
         `;
         tbody.appendChild(tr);
@@ -150,9 +150,8 @@ function renderTabela() {
 function formatarData(iso) {
   if (!iso) return "—";
   const d = new Date(iso);
-  // dd/mm HH:MM:SS — sem o ano
-  const dia = d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
-  const hora = d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  const dia  = d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+  const hora = d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
   return `${dia} ${hora}`;
 }
 
