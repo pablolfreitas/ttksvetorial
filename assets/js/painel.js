@@ -110,9 +110,10 @@ function renderTabela() {
         const dataInicio = t.data_inicio   ? formatarData(t.data_inicio)   : "—";
         const descHtml   = (t.regiao || "—").replace(/\n/g, "<br>");
 
-        // SP: se tiver mais de 7 caracteres, permite quebra de linha
-        const spVal  = t.sp || "—";
-        const spClass = spVal.length > 7 ? "cell-sp cell-sp-wrap" : "cell-sp";
+        // SP: quebra linha apenas quando tiver 3 ou mais valores separados por vírgula
+        const spVal   = t.sp || "—";
+        const spCount = spVal.split(",").length;
+        const spClass = spCount >= 3 ? "cell-sp cell-sp-wrap" : "cell-sp";
 
         const tr = document.createElement("tr");
         tr.innerHTML = `
