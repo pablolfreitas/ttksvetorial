@@ -2,22 +2,37 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg:            #1a1a2e;
-  --bg2:           #16213e;
-  --bg3:           #0f3460;
-  --verde:         #1a5c38;
-  --verde-claro:   #2d8a57;
-  --verde-brilho:  #3aaa6a;
-  --texto:         #e0e0e0;
-  --texto-dim:     #9090a8;
-  --borda:         #2a4a6a;
-  --danger:        #c0392b;
-  --tag-massiva:   #e67e22;
-  --tag-pendencia: #8e44ad;
-  --region-bg:     #1e3a5a;
-  --th-bg:         #162030;
-  --hover-linha:   rgba(255,255,255,0.035);
-  --zebra:         rgba(255,255,255,0.02);
+  /* Base neutra (menos azul vibrante) */
+  --bg:            #0f172a;   /* slate 900 */
+  --bg2:           #111827;   /* slate 800 */
+  --bg3:           #1f2937;   /* slate 700 */
+
+  /* Verde menos saturado */
+  --verde:         #134e3a;   /* verde profundo */
+  --verde-claro:   #15803d;   /* verde 700 */
+  --verde-brilho:  #166534;   /* usado só para detalhe */
+
+  /* Texto */
+  --texto:         #e5e7eb;   /* cinza claro, não branco puro */
+  --texto-dim:     #9ca3af;   /* slate 400 */
+
+  /* Bordas mais suaves */
+  --borda:         #243244;
+
+  /* Estados */
+  --danger:        #b91c1c;
+
+  /* Tags suavizadas (fallback, caso use sólido em algum lugar) */
+  --tag-massiva:   #b45309;   /* amber 700 */
+  --tag-pendencia: #6d28d9;   /* roxo menos vibrante */
+
+  /* Região */
+  --region-bg:     #1e293b;   /* slate 700 */
+  --th-bg:         #182230;   /* header mais discreto */
+
+  /* Interações sutis */
+  --hover-linha:   rgba(255,255,255,0.045);
+  --zebra:         rgba(255,255,255,0.025);
 }
 
 body {
@@ -35,7 +50,7 @@ header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 2px solid var(--verde-brilho);
+  border-bottom: 2px solid rgba(255,255,255,0.08); /* mais suave que verde-brilho */
   position: sticky;
   top: 0;
   z-index: 100;
@@ -48,14 +63,14 @@ nav { display: flex; gap: 8px; }
   padding: 7px 20px;
   border-radius: 6px;
   text-decoration: none;
-  color: #b8dcc8;
+  color: rgba(229,231,235,0.78);
   font-size: 1rem;
   font-weight: 600;
   transition: background 0.2s;
   border: 1px solid transparent;
 }
-.nav-btn:hover { background: rgba(255,255,255,0.12); color: white; }
-.nav-btn.active { background: rgba(255,255,255,0.18); color: white; border-color: rgba(255,255,255,0.2); }
+.nav-btn:hover { background: rgba(255,255,255,0.10); color: white; }
+.nav-btn.active { background: rgba(255,255,255,0.16); color: white; border-color: rgba(255,255,255,0.18); }
 
 /* ===== CONTAINERS ===== */
 .container      { max-width: 760px; margin: 28px auto; padding: 0 20px; }
@@ -166,8 +181,8 @@ select, textarea {
   font-family: inherit;
 }
 input:focus, select:focus, textarea:focus {
-  border-color: var(--verde-claro);
-  box-shadow: 0 0 0 2px rgba(45,138,87,0.18);
+  border-color: rgba(34, 197, 94, 0.55);
+  box-shadow: 0 0 0 2px rgba(21,128,61,0.18);
 }
 
 .tags-group { display: flex; gap: 22px; flex-wrap: wrap; margin-top: 6px; }
@@ -202,13 +217,13 @@ input:focus, select:focus, textarea:focus {
   z-index: 300;
   padding: 12px 24px;
   border-radius: 8px;
-  background: #1e3a24;
-  border: 1px solid var(--verde-claro);
+  background: rgba(21,128,61,0.18);
+  border: 1px solid rgba(21,128,61,0.45);
   font-size: 0.9rem;
   white-space: nowrap;
   box-shadow: 0 4px 16px rgba(0,0,0,0.4);
 }
-.alerta.erro { background: #3a1414; border-color: var(--danger); }
+.alerta.erro { background: rgba(185,28,28,0.18); border-color: rgba(185,28,28,0.55); }
 .hidden { display: none; }
 
 /* ===== PAINEL HEADER ===== */
@@ -223,15 +238,17 @@ input:focus, select:focus, textarea:focus {
 
 .grupo-titulo {
   background: var(--region-bg);
-  color: white;
+  color: var(--texto);
   text-align: center;
   font-weight: 800;
-  font-size: 1.05rem;       /* ← maior */
+  font-size: 1.05rem;
   letter-spacing: 0.2em;
   padding: 10px;
   text-transform: uppercase;
-  border-left: 3px solid var(--verde-brilho);
-  border-right: 3px solid var(--verde-brilho);
+
+  /* antes era verde-brilho (muito chamativo). Agora é neutro. */
+  border-left: 3px solid #334155;
+  border-right: 3px solid #334155;
 }
 
 .tickets-table {
@@ -244,19 +261,19 @@ input:focus, select:focus, textarea:focus {
   background: var(--th-bg);
   padding: 11px 12px;
   text-align: center;
-  color: #c0d4e8;
+  color: rgba(229,231,235,0.78);
   font-weight: 700;
   text-transform: uppercase;
-  font-size: 0.85rem;       /* ← maior */
+  font-size: 0.85rem;
   letter-spacing: 0.07em;
   white-space: nowrap;
-  border-bottom: 2px solid var(--borda);
+  border-bottom: 2px solid rgba(255,255,255,0.06);
 }
 
 /* TODAS as células com vertical-align: middle sempre */
 .tickets-table td {
   padding: 11px 12px;
-  border-bottom: 1px solid #1a2e46;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
   vertical-align: middle;
   text-align: center;
   line-height: 1.5;
@@ -304,18 +321,25 @@ input:focus, select:focus, textarea:focus {
   border-radius: 20px;
   font-size: 0.75rem;
   font-weight: 700;
-  color: white;
   white-space: nowrap;
   letter-spacing: 0.04em;
 }
-.tag-Massiva   { background: var(--tag-massiva); }
-.tag-pendencia { background: var(--tag-pendencia); }
+
+/* Tags translúcidas (menos cansativas) */
+.tag-Massiva {
+  background: rgba(180, 83, 9, 0.18);
+  color: #f59e0b;
+}
+.tag-pendencia {
+  background: rgba(109, 40, 217, 0.18);
+  color: #a78bfa;
+}
 
 /* botões inline tabela */
 .btn-edit-desc {
   background: none;
   border: 1px solid var(--borda);
-  color: var(--verde-claro);
+  color: rgba(34, 197, 94, 0.85);
   border-radius: 4px;
   padding: 2px 7px;
   font-size: 0.78rem;
@@ -324,19 +348,19 @@ input:focus, select:focus, textarea:focus {
   flex-shrink: 0;
   transition: all 0.15s;
 }
-.btn-edit-desc:hover { background: rgba(45,138,87,0.18); border-color: var(--verde-claro); }
+.btn-edit-desc:hover { background: rgba(21,128,61,0.18); border-color: rgba(34,197,94,0.45); }
 
 .btn-delete {
   background: none;
-  border: 1px solid rgba(192,57,43,0.3);
-  color: rgba(192,57,43,0.8);
+  border: 1px solid rgba(185,28,28,0.35);
+  color: rgba(185,28,28,0.85);
   border-radius: 4px;
   padding: 2px 7px;
   font-size: 0.78rem;
   cursor: pointer;
   transition: all 0.15s;
 }
-.btn-delete:hover { background: rgba(192,57,43,0.15); border-color: var(--danger); color: var(--danger); }
+.btn-delete:hover { background: rgba(185,28,28,0.16); border-color: rgba(185,28,28,0.65); color: #ef4444; }
 
 .sem-tickets {
   text-align: center; padding: 12px;
