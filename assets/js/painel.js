@@ -38,35 +38,40 @@ function renderTabela() {
   const wrapper = document.getElementById("tabela-wrapper");
   wrapper.innerHTML = "";
 
+  const COLGROUP = `
+    <colgroup>
+      <col style="width:175px">
+      <col style="width:220px">
+      <col style="width:55px">
+      <col><!-- descrição: ocupa todo o espaço restante -->
+      <col style="width:145px">
+      <col style="width:160px">
+      <col style="width:62px">
+      <col style="width:155px">
+      <col style="width:145px">
+      <col style="width:36px">
+    </colgroup>`;
+
+  const THEAD = `
+    <thead>
+      <tr>
+        <th>TTKs</th>
+        <th>ID de Serviço</th>
+        <th>SP</th>
+        <th>Descrição</th>
+        <th>Atualização</th>
+        <th>Cidade</th>
+        <th>Sigla</th>
+        <th>TAG</th>
+        <th>Dat. Início</th>
+        <th></th>
+      </tr>
+    </thead>`;
+
   // Cabeçalho fixo único
   wrapper.insertAdjacentHTML("beforeend", `
     <table class="tickets-table" style="margin-bottom:0; table-layout:fixed; width:100%;">
-      <colgroup>
-        <col style="width:155px">
-        <col style="width:200px">
-        <col style="width:60px">
-        <col style="width:280px">
-        <col style="width:155px">
-        <col style="width:145px">
-        <col style="width:58px">
-        <col style="width:140px">
-        <col style="width:155px">
-        <col style="width:36px">
-      </colgroup>
-      <thead>
-        <tr>
-          <th>TTKs</th>
-          <th>ID de Serviço</th>
-          <th>SP</th>
-          <th>Descrição</th>
-          <th>Atualização</th>
-          <th>Cidade</th>
-          <th>Sigla</th>
-          <th>TAG</th>
-          <th>Dat. Início</th>
-          <th></th>
-        </tr>
-      </thead>
+      ${COLGROUP}${THEAD}
     </table>`);
 
   Object.entries(grupos).forEach(([nomeGrupo, lista]) => {
@@ -83,15 +88,15 @@ function renderTabela() {
     table.style.cssText = "table-layout:fixed; width:100%;";
     table.innerHTML = `
       <colgroup>
-        <col style="width:155px">
-        <col style="width:200px">
-        <col style="width:60px">
-        <col style="width:280px">
+        <col style="width:175px">
+        <col style="width:220px">
+        <col style="width:55px">
+        <col>
+        <col style="width:145px">
+        <col style="width:160px">
+        <col style="width:62px">
         <col style="width:155px">
         <col style="width:145px">
-        <col style="width:58px">
-        <col style="width:140px">
-        <col style="width:155px">
         <col style="width:36px">
       </colgroup>`;
 
@@ -145,8 +150,10 @@ function renderTabela() {
 function formatarData(iso) {
   if (!iso) return "—";
   const d = new Date(iso);
-  return d.toLocaleDateString("pt-BR") + " " +
-    d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  // dd/mm HH:MM:SS — sem o ano
+  const dia = d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+  const hora = d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  return `${dia} ${hora}`;
 }
 
 // ===== MODAL EDITAR DESCRIÇÃO =====
