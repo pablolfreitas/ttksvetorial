@@ -42,16 +42,16 @@ function renderTabela() {
   wrapper.insertAdjacentHTML("beforeend", `
     <table class="tickets-table" style="margin-bottom:0; table-layout:fixed; width:100%;">
       <colgroup>
-        <col style="width:160px">
-        <col style="width:210px">
-        <col style="width:70px">
-        <col><!-- descrição ocupa o resto -->
-        <col style="width:160px">
-        <col style="width:130px">
+        <col style="width:155px">
+        <col style="width:200px">
         <col style="width:60px">
-        <col style="width:120px">
-        <col style="width:160px">
-        <col style="width:42px">
+        <col style="width:280px">
+        <col style="width:155px">
+        <col style="width:145px">
+        <col style="width:58px">
+        <col style="width:140px">
+        <col style="width:155px">
+        <col style="width:36px">
       </colgroup>
       <thead>
         <tr>
@@ -83,16 +83,16 @@ function renderTabela() {
     table.style.cssText = "table-layout:fixed; width:100%;";
     table.innerHTML = `
       <colgroup>
-        <col style="width:160px">
-        <col style="width:210px">
-        <col style="width:70px">
-        <col>
-        <col style="width:160px">
-        <col style="width:130px">
+        <col style="width:155px">
+        <col style="width:200px">
         <col style="width:60px">
-        <col style="width:120px">
-        <col style="width:160px">
-        <col style="width:42px">
+        <col style="width:280px">
+        <col style="width:155px">
+        <col style="width:145px">
+        <col style="width:58px">
+        <col style="width:140px">
+        <col style="width:155px">
+        <col style="width:36px">
       </colgroup>`;
 
     const tbody = document.createElement("tbody");
