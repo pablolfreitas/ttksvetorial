@@ -11,6 +11,12 @@ function mostrarAlerta(msg, erro = false) {
   setTimeout(() => el.classList.add("hidden"), 4000);
 }
 
+// ===== Auto-fill sigla e grupo ao selecionar cidade =====
+document.getElementById("cidade").addEventListener("change", function () {
+  const selected = this.options[this.selectedIndex];
+  document.getElementById("sigla").value = selected.dataset.sigla || "";
+});
+
 // Pré-preenche data/hora atual
 const dataInput = document.getElementById("data_inicio");
 const agora = new Date();
@@ -41,16 +47,20 @@ document.getElementById("form-ticket").addEventListener("submit", async (e) => {
     return;
   }
 
+  const cidadeSelect = document.getElementById("cidade");
+  const cidadeOpt = cidadeSelect.options[cidadeSelect.selectedIndex];
+
   const payload = {
-    ttk:        document.getElementById("ttk").value.trim(),
-    id_servico: document.getElementById("id_servico").value.trim(),
-    sp:         document.getElementById("sp").value || null,
-    regiao:     document.getElementById("regiao").value.trim(),
-    data_inicio: document.getElementById("data_inicio").value || null,
-    cidade:     document.getElementById("cidade").value,
-    sigla:      document.getElementById("sigla").value.trim().toUpperCase(),
-    tag:        tag.value,
-    tecnico:    document.getElementById("tecnico").value.trim(),
+    ttk:          document.getElementById("ttk").value.trim(),
+    id_servico:   document.getElementById("id_servico").value.trim(),
+    sp:           document.getElementById("sp").value || null,
+    regiao:       document.getElementById("regiao").value.trim(),
+    grupo_regiao: cidadeOpt.dataset.grupo || "SUL",
+    data_inicio:  document.getElementById("data_inicio").value || null,
+    cidade:       cidadeSelect.value,
+    sigla:        document.getElementById("sigla").value.trim().toUpperCase(),
+    tag:          tag.value,
+    tecnico:      document.getElementById("tecnico").value.trim(),
     atualizado_em: new Date().toISOString(),
   };
 
