@@ -16,19 +16,59 @@ async function carregarTickets() {
     if (!res.ok) throw new Error("Erro ao buscar tickets");
     todosTickets = await res.json();
     renderTabela();
-    document.getElementById("ultima-atualizacao").textContent =
-      "Atualizado às " + new Date().toLocaleTimeString("pt-BR");
+    atualizarContadores();
+    const agora = new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+    document.getElementById("ultima-atualizacao").textContent = "Atualizado às " + agora;
   } catch (err) {
     document.getElementById("tabela-wrapper").innerHTML =
       `<div class="loading" style="color:#e74c3c;">❌ ${err.message}<br><br>Verifique as credenciais no supabase-config.js</div>`;
   }
 }
 
+// ===== CONTADORES =====
+function atualizarContadores() {
+  const total    = todosTickets.length;
+  const massiva  = todosTickets.filter(t => t.tag === "Massiva").length;
+  const pendencia = todosTickets.filter(t => t.tag === "Pendência Técnica").length;
+
+  document.getElementById("cnt-total").textContent    = total;
+  document.getElementById("cnt-massiva").textContent  = massiva;
+  document.getElementById("cnt-pendencia").textContent = pendencia;
+}
+
+// ===== SLA =====
+function calcularSLA(ticket) {
+  if (!ticket.data_inicio) return null;
+  const limitHoras = ticket.tag === "Massiva" ? 8 : 24;
+  const inicio     = new Date(ticket.data_inicio);
+  const agora      = new Date();
+  const decorrido  = (agora - inicio) / (1000 * 60 * 60); // horas
+  const pct        = Math.min(Math.round((decorrido / limitHoras) * 100), 100);
+  return { pct, limitHoras, decorrido: decorrido.toFixed(1) };
+}
+
+function slaBar(ticket) {
+  const s = calcularSLA(ticket);
+  if (!s) return `<span style="color:var(--texto-dim);font-size:0.78rem;">—</span>`;
+
+  let cor, label;
+  if (s.pct < 50)      { cor = "#2ecc71"; label = "verde"; }
+  else if (s.pct < 80) { cor = "#f39c12"; label = "amarelo"; }
+  else                 { cor = "#e74c3c"; label = "vermelho"; }
+
+  return `
+    <div class="sla-wrap" title="${s.decorrido}h / ${s.limitHoras}h">
+      <div class="sla-bar-bg">
+        <div class="sla-bar-fill" style="width:${s.pct}%;background:${cor};box-shadow:0 0 6px ${cor}88;"></div>
+      </div>
+      <span class="sla-pct" style="color:${cor};">${s.pct}%</span>
+    </div>`;
+}
+
 // ===== RENDER =====
 function renderTabela() {
   const grupos = {};
   ORDEM_REGIOES.forEach(r => { grupos[r] = []; });
-
   todosTickets.forEach(t => {
     const grupo = (t.grupo_regiao || "SUL").toUpperCase();
     if (!grupos[grupo]) grupos[grupo] = [];
@@ -42,9 +82,9 @@ function renderTabela() {
     <colgroup>
       <col style="width:155px">
       <col style="width:200px">
-      <col style="width:75px">
-      <col><!-- descrição: ocupa todo o espaço restante -->
-      <col style="width:138px">
+      <col style="width:60px">
+      <col>
+      <col style="width:130px">
       <col style="width:148px">
       <col style="width:155px">
       <col style="width:138px">
@@ -58,7 +98,7 @@ function renderTabela() {
         <th>ID de Serviço</th>
         <th>SP</th>
         <th>Descrição</th>
-        <th>Atualização</th>
+        <th>SLA</th>
         <th>Cidade</th>
         <th>TAG</th>
         <th>Dat. Início</th>
@@ -66,7 +106,6 @@ function renderTabela() {
       </tr>
     </thead>`;
 
-  // Cabeçalho fixo único
   wrapper.insertAdjacentHTML("beforeend", `
     <table class="tickets-table" style="margin-bottom:0; table-layout:fixed; width:100%;">
       ${COLGROUP}${THEAD}
@@ -88,9 +127,9 @@ function renderTabela() {
       <colgroup>
         <col style="width:155px">
         <col style="width:200px">
-        <col style="width:75px">
+        <col style="width:60px">
         <col>
-        <col style="width:138px">
+        <col style="width:130px">
         <col style="width:148px">
         <col style="width:155px">
         <col style="width:138px">
@@ -105,23 +144,30 @@ function renderTabela() {
       tbody.appendChild(tr);
     } else {
       lista.forEach(t => {
-        const tagClass  = t.tag === "Massiva" ? "tag-Massiva" : "tag-pendencia";
-        const dataAtual  = t.atualizado_em ? formatarData(t.atualizado_em) : "—";
-        const dataInicio = t.data_inicio   ? formatarData(t.data_inicio)   : "—";
+        const tagClass   = t.tag === "Massiva" ? "tag-Massiva" : "tag-pendencia";
+        const dataInicio = t.data_inicio ? formatarData(t.data_inicio) : "—";
         const descHtml   = (t.regiao || "—").replace(/\n/g, "<br>");
-
-        // SP: quebra linha apenas quando tiver 3 ou mais valores separados por vírgula
-        const spVal   = t.sp || "—";
-        const spCount = spVal.split(",").length;
-        const spClass = spCount >= 3 ? "cell-sp cell-sp-wrap" : "cell-sp";
+        const spVal      = t.sp || "—";
+        const spClass    = spVal.split(",").length >= 3 ? "cell-sp cell-sp-wrap" : "cell-sp";
+        const atualizadoHora = t.atualizado_em
+          ? new Date(t.atualizado_em).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })
+          : "";
 
         const tr = document.createElement("tr");
         tr.innerHTML = `
           <td class="cell-mono cell-center">${t.ttk || "—"}</td>
           <td class="cell-mono cell-center">${t.id_servico || "—"}</td>
           <td class="${spClass}">${spVal}</td>
-          <td class="col-descricao"><span class="descricao-texto">${descHtml}</span><button class="btn-edit-desc" data-id="${t.id}" title="Editar descrição">✏️ editar</button></td>
-          <td class="cell-center">${dataAtual}</td>
+          <td class="col-descricao">
+            <div class="desc-inner">
+              <span class="descricao-texto">${descHtml}</span>
+              <div class="desc-footer">
+                <span class="atualizado-label">${atualizadoHora ? "atualizado às " + atualizadoHora : ""}</span>
+                <button class="btn-edit-desc" data-id="${t.id}" title="Editar descrição">✏️ editar</button>
+              </div>
+            </div>
+          </td>
+          <td class="cell-sla">${slaBar(t)}</td>
           <td class="cell-center">${t.cidade || "—"}</td>
           <td class="cell-center"><span class="tag-badge ${tagClass}">${t.tag || "—"}</span></td>
           <td class="cell-center">${dataInicio}</td>
@@ -173,7 +219,6 @@ document.getElementById("modal-salvar").addEventListener("click", async () => {
   const novoTexto = document.getElementById("modal-texto").value.trim();
   const btn = document.getElementById("modal-salvar");
   btn.disabled = true;
-
   try {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/tickets?id=eq.${ticketEditando.id}`, {
       method: "PATCH",
@@ -186,7 +231,6 @@ document.getElementById("modal-salvar").addEventListener("click", async () => {
       body: JSON.stringify({ regiao: novoTexto, atualizado_em: new Date().toISOString() })
     });
     if (!res.ok) throw new Error("Erro ao atualizar");
-
     const idx = todosTickets.findIndex(t => t.id == ticketEditando.id);
     if (idx >= 0) {
       todosTickets[idx].regiao = novoTexto;
@@ -229,6 +273,7 @@ document.getElementById("delete-confirmar").addEventListener("click", async () =
     document.getElementById("modal-delete").classList.add("hidden");
     ticketDeletando = null;
     renderTabela();
+    atualizarContadores();
     mostrarAlerta("🗑️ Ticket removido.");
   } catch (err) {
     mostrarAlerta("❌ " + err.message, true);
@@ -248,7 +293,8 @@ function mostrarAlerta(msg, erro = false) {
 
 document.getElementById("btn-atualizar").addEventListener("click", carregarTickets);
 
-// Compatibilidade: ignora filtros removidos do HTML
+// Recalcula barras SLA a cada minuto sem buscar do banco
+setInterval(() => { if (todosTickets.length) renderTabela(); }, 60000);
 
 carregarTickets();
 setInterval(carregarTickets, 30000);
