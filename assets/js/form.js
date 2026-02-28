@@ -14,13 +14,14 @@ document.getElementById("cidade").addEventListener("change", function () {
   document.getElementById("sigla").value = sel.dataset.sigla || "";
 });
 
-// Pré-preenche data/hora atual no fuso de Brasília (UTC-3)
+// Pré-preenche data/hora atual no horário local do browser
 const dataInput = document.getElementById("data_inicio");
 function setDataAtual() {
-  // Subtrai 3h para ajustar ao UTC-3 (horário de Brasília)
   const agora = new Date();
-  const brasilia = new Date(agora.getTime() - (3 * 60 * 60 * 1000));
-  dataInput.value = brasilia.toISOString().slice(0, 16);
+  // Formata como YYYY-MM-DDTHH:MM no horário local
+  const pad = n => String(n).padStart(2, "0");
+  const local = `${agora.getFullYear()}-${pad(agora.getMonth()+1)}-${pad(agora.getDate())}T${pad(agora.getHours())}:${pad(agora.getMinutes())}`;
+  dataInput.value = local;
 }
 setDataAtual();
 
@@ -121,12 +122,12 @@ document.getElementById("form-ticket").addEventListener("submit", async (e) => {
     dataFmt = `${dia}/${mes}/${ano} ${hora}:${min}`;
   }
 
-  // Para salvar no Supabase, converte o horário local para UTC somando 3h
+  // Para salvar no Supabase: datetime-local já é horário local (Brasília)
+  // Apenas adicionamos o offset correto sem somar horas extras
   let dataISO = null;
   if (dataRaw) {
-    const localDate = new Date(dataRaw);
-    const utcDate = new Date(localDate.getTime() + (3 * 60 * 60 * 1000));
-    dataISO = utcDate.toISOString();
+    // Cria a data interpretando como horário local do browser
+    dataISO = new Date(dataRaw).toISOString();
   }
 
   const dados = {
