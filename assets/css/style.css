@@ -59,7 +59,7 @@ nav { display: flex; gap: 10px; }
   padding: 0 16px;
 }
 .container-wide {
-  max-width: 1400px;
+  max-width: 1860px;
   margin: 20px auto;
   padding: 0 20px;
 }
@@ -188,40 +188,40 @@ input:focus, select:focus, textarea:focus {
   color: white;
   text-align: center;
   font-weight: 700;
-  font-size: 0.82rem;
-  letter-spacing: 0.12em;
-  padding: 7px;
+  font-size: 1rem;
+  letter-spacing: 0.14em;
+  padding: 9px;
   text-transform: uppercase;
 }
 
 .tickets-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.84rem;
+  font-size: 0.92rem;
 }
 .tickets-table th {
   background: #162030;
-  padding: 8px 10px;
+  padding: 10px 12px;
   text-align: left;
-  color: var(--texto-dim);
+  color: #c8d8e8;
   font-weight: 700;
   text-transform: uppercase;
-  font-size: 0.70rem;
-  letter-spacing: 0.07em;
+  font-size: 0.82rem;
+  letter-spacing: 0.06em;
   white-space: nowrap;
 }
 .tickets-table td {
-  padding: 8px 10px;
+  padding: 10px 12px;
   border-bottom: 1px solid #1a2a3a;
   vertical-align: middle;
-  line-height: 1.45;
+  line-height: 1.5;
 }
 .tickets-table tr:hover td { background: rgba(255,255,255,0.035); }
 
 /* células especiais */
 .cell-mono {
   font-family: 'Consolas', 'Courier New', monospace;
-  font-size: 0.82rem;
+  font-size: 0.88rem;
   white-space: nowrap;
 }
 .cell-center { text-align: center; }
