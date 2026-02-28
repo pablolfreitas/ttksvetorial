@@ -14,11 +14,13 @@ document.getElementById("cidade").addEventListener("change", function () {
   document.getElementById("sigla").value = sel.dataset.sigla || "";
 });
 
-// Pré-preenche data/hora atual
+// Pré-preenche data/hora atual no fuso de Brasília (UTC-3)
 const dataInput = document.getElementById("data_inicio");
 function setDataAtual() {
-  dataInput.value = new Date(Date.now() - new Date().getTimezoneOffset() * 60000)
-    .toISOString().slice(0, 16);
+  // Subtrai 3h para ajustar ao UTC-3 (horário de Brasília)
+  const agora = new Date();
+  const brasilia = new Date(agora.getTime() - (3 * 60 * 60 * 1000));
+  dataInput.value = brasilia.toISOString().slice(0, 16);
 }
 setDataAtual();
 
@@ -32,10 +34,14 @@ function gerarMaps(rua, bairro, cidade) {
 // Gera máscara formatada
 function gerarMascara(d) {
   const maps = gerarMaps(d.rua, d.bairro, d.cidade);
-  const obs  = d.obs ? `\nObs: ${d.obs}` : "\nObs:";
+  const sla  = d.tag === "Massiva" ? "8 Horas" : "24 Horas";
+  const obs  = d.obs
+    ? `Observações para a equipe: ${d.obs}`
+    : "Observações para a equipe:";
+
   return `TTK: ${d.ttk}
 ID Serviço: ${d.id_servico}
-Causa Raiz:
+Causa Raiz: Equipe deve preencher
 TAG: ${d.tag}
 ARD: ${d.ard}
 SP: ${d.sp}
@@ -46,10 +52,11 @@ Bairro: ${d.bairro}
 Cidade: ${d.cidade}
 Localização: ${maps}
 Data Inicio: ${d.data_inicio_fmt}
-Data Fim:${obs}
+Data Fim:
+${obs}
 
 
-SLA:
+SLA: ${sla}
 Material gasto:
 
 SIM:( ) Não alterar escrita, apenas coloque o X sem espaço se gasto material FiBrasil
@@ -105,11 +112,21 @@ document.getElementById("form-ticket").addEventListener("submit", async (e) => {
   const cidadeOpt    = cidadeSelect.options[cidadeSelect.selectedIndex];
   const dataRaw      = document.getElementById("data_inicio").value;
 
+  // Formata data para exibição na máscara (já está no horário local digitado)
   let dataFmt = "";
   if (dataRaw) {
-    const d = new Date(dataRaw);
-    dataFmt = d.toLocaleDateString("pt-BR") + " " +
-      d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+    const [datePart, timePart] = dataRaw.split("T");
+    const [ano, mes, dia] = datePart.split("-");
+    const [hora, min] = timePart.split(":");
+    dataFmt = `${dia}/${mes}/${ano} ${hora}:${min}`;
+  }
+
+  // Para salvar no Supabase, converte o horário local para UTC somando 3h
+  let dataISO = null;
+  if (dataRaw) {
+    const localDate = new Date(dataRaw);
+    const utcDate = new Date(localDate.getTime() + (3 * 60 * 60 * 1000));
+    dataISO = utcDate.toISOString();
   }
 
   const dados = {
@@ -127,9 +144,7 @@ document.getElementById("form-ticket").addEventListener("submit", async (e) => {
     regiao:          document.getElementById("regiao").value.trim(),
     obs:             document.getElementById("obs").value.trim(),
     grupo_regiao:    cidadeOpt.dataset.grupo || "SUL",
-    data_inicio:     dataRaw || null,
     data_inicio_fmt: dataFmt,
-    atualizado_em:   new Date().toISOString(),
   };
 
   const payload = {
@@ -138,11 +153,11 @@ document.getElementById("form-ticket").addEventListener("submit", async (e) => {
     sp:           dados.sp || null,
     regiao:       dados.regiao,
     grupo_regiao: dados.grupo_regiao,
-    data_inicio:  dados.data_inicio,
+    data_inicio:  dataISO,
     cidade:       dados.cidade,
     sigla:        dados.sigla,
     tag:          dados.tag,
-    atualizado_em: dados.atualizado_em,
+    atualizado_em: new Date().toISOString(),
   };
 
   try {
