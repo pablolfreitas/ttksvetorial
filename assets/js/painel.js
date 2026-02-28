@@ -40,15 +40,15 @@ function renderTabela() {
 
   const COLGROUP = `
     <colgroup>
-      <col style="width:175px">
-      <col style="width:220px">
-      <col style="width:55px">
+      <col style="width:148px">
+      <col style="width:195px">
+      <col style="width:72px">
       <col><!-- descrição: ocupa todo o espaço restante -->
-      <col style="width:145px">
-      <col style="width:160px">
-      <col style="width:62px">
+      <col style="width:138px">
+      <col style="width:148px">
+      <col style="width:58px">
       <col style="width:155px">
-      <col style="width:145px">
+      <col style="width:138px">
       <col style="width:36px">
     </colgroup>`;
 
@@ -88,15 +88,15 @@ function renderTabela() {
     table.style.cssText = "table-layout:fixed; width:100%;";
     table.innerHTML = `
       <colgroup>
-        <col style="width:175px">
-        <col style="width:220px">
-        <col style="width:55px">
+        <col style="width:148px">
+        <col style="width:195px">
+        <col style="width:72px">
         <col>
-        <col style="width:145px">
-        <col style="width:160px">
-        <col style="width:62px">
+        <col style="width:138px">
+        <col style="width:148px">
+        <col style="width:58px">
         <col style="width:155px">
-        <col style="width:145px">
+        <col style="width:138px">
         <col style="width:36px">
       </colgroup>`;
 
@@ -117,7 +117,7 @@ function renderTabela() {
         tr.innerHTML = `
           <td class="cell-mono">${t.ttk || "—"}</td>
           <td class="cell-mono">${t.id_servico || "—"}</td>
-          <td class="cell-center">${t.sp || "—"}</td>
+          <td class="cell-sp">${t.sp || "—"}</td>
           <td class="col-descricao">
             <span class="descricao-texto">${descHtml}</span>
             <button class="btn-edit-desc" data-id="${t.id}" title="Editar descrição">✏️</button>
