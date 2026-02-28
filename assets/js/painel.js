@@ -120,7 +120,7 @@ function renderTabela() {
           <td class="cell-mono cell-center">${t.ttk || "—"}</td>
           <td class="cell-mono cell-center">${t.id_servico || "—"}</td>
           <td class="${spClass}">${spVal}</td>
-          <td class="col-descricao"><span class="descricao-texto">${descHtml}</span> <button class="btn-edit-desc" data-id="${t.id}" title="Editar descrição">✏️</button></td>
+          <td class="col-descricao"><span class="descricao-texto">${descHtml}</span><button class="btn-edit-desc" data-id="${t.id}" title="Editar descrição">✏️ editar</button></td>
           <td class="cell-center">${dataAtual}</td>
           <td class="cell-center">${t.cidade || "—"}</td>
           <td class="cell-center"><span class="tag-badge ${tagClass}">${t.tag || "—"}</span></td>
