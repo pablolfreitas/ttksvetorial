@@ -1,27 +1,21 @@
 /* ===== RESET & BASE ===== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-::root {
+:root {
   --bg:            #1a1a2e;
   --bg2:           #16213e;
   --bg3:           #0f3460;
-
-  /* ✅ Novo verde (menos vibrante, mais confortável) */
-  --verde:         #134e3a;
-  --verde-claro:   #15803d;
-  --verde-brilho:  #166534;
-
+  --verde:         #1a5c38;
+  --verde-claro:   #2d8a57;
+  --verde-brilho:  #3aaa6a;
   --texto:         #e0e0e0;
   --texto-dim:     #9090a8;
   --borda:         #2a4a6a;
   --danger:        #c0392b;
-
---tag-massiva:   #e67e22;
---tag-pendencia: #8e44ad;
-
+  --tag-massiva:   #e67e22;
+  --tag-pendencia: #8e44ad;
   --region-bg:     #1e3a5a;
   --th-bg:         #162030;
-
   --hover-linha:   rgba(255,255,255,0.035);
   --zebra:         rgba(255,255,255,0.02);
 }
@@ -41,7 +35,7 @@ header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 2px solid rgba(255,255,255,0.08); /* mais suave que verde-brilho */
+  border-bottom: 2px solid var(--verde-brilho);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -54,14 +48,14 @@ nav { display: flex; gap: 8px; }
   padding: 7px 20px;
   border-radius: 6px;
   text-decoration: none;
-  color: rgba(229,231,235,0.78);
+  color: #b8dcc8;
   font-size: 1rem;
   font-weight: 600;
   transition: background 0.2s;
   border: 1px solid transparent;
 }
-.nav-btn:hover { background: rgba(255,255,255,0.10); color: white; }
-.nav-btn.active { background: rgba(255,255,255,0.16); color: white; border-color: rgba(255,255,255,0.18); }
+.nav-btn:hover { background: rgba(255,255,255,0.12); color: white; }
+.nav-btn.active { background: rgba(255,255,255,0.18); color: white; border-color: rgba(255,255,255,0.2); }
 
 /* ===== CONTAINERS ===== */
 .container      { max-width: 760px; margin: 28px auto; padding: 0 20px; }
@@ -172,8 +166,8 @@ select, textarea {
   font-family: inherit;
 }
 input:focus, select:focus, textarea:focus {
-  border-color: rgba(34, 197, 94, 0.55);
-  box-shadow: 0 0 0 2px rgba(21,128,61,0.18);
+  border-color: var(--verde-claro);
+  box-shadow: 0 0 0 2px rgba(45,138,87,0.18);
 }
 
 .tags-group { display: flex; gap: 22px; flex-wrap: wrap; margin-top: 6px; }
@@ -208,13 +202,13 @@ input:focus, select:focus, textarea:focus {
   z-index: 300;
   padding: 12px 24px;
   border-radius: 8px;
-  background: rgba(21,128,61,0.18);
-  border: 1px solid rgba(21,128,61,0.45);
+  background: #1e3a24;
+  border: 1px solid var(--verde-claro);
   font-size: 0.9rem;
   white-space: nowrap;
   box-shadow: 0 4px 16px rgba(0,0,0,0.4);
 }
-.alerta.erro { background: rgba(185,28,28,0.18); border-color: rgba(185,28,28,0.55); }
+.alerta.erro { background: #3a1414; border-color: var(--danger); }
 .hidden { display: none; }
 
 /* ===== PAINEL HEADER ===== */
@@ -229,17 +223,15 @@ input:focus, select:focus, textarea:focus {
 
 .grupo-titulo {
   background: var(--region-bg);
-  color: var(--texto);
+  color: white;
   text-align: center;
   font-weight: 800;
-  font-size: 1.05rem;
+  font-size: 1.05rem;       /* ← maior */
   letter-spacing: 0.2em;
   padding: 10px;
   text-transform: uppercase;
-
-  /* antes era verde-brilho (muito chamativo). Agora é neutro. */
-  border-left: 3px solid #334155;
-  border-right: 3px solid #334155;
+  border-left: 3px solid var(--verde-brilho);
+  border-right: 3px solid var(--verde-brilho);
 }
 
 .tickets-table {
@@ -252,19 +244,19 @@ input:focus, select:focus, textarea:focus {
   background: var(--th-bg);
   padding: 11px 12px;
   text-align: center;
-  color: rgba(229,231,235,0.78);
+  color: #c0d4e8;
   font-weight: 700;
   text-transform: uppercase;
-  font-size: 0.85rem;
+  font-size: 0.85rem;       /* ← maior */
   letter-spacing: 0.07em;
   white-space: nowrap;
-  border-bottom: 2px solid rgba(255,255,255,0.06);
+  border-bottom: 2px solid var(--borda);
 }
 
 /* TODAS as células com vertical-align: middle sempre */
 .tickets-table td {
   padding: 11px 12px;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  border-bottom: 1px solid #1a2e46;
   vertical-align: middle;
   text-align: center;
   line-height: 1.5;
@@ -312,26 +304,18 @@ input:focus, select:focus, textarea:focus {
   border-radius: 20px;
   font-size: 0.75rem;
   font-weight: 700;
+  color: white;
   white-space: nowrap;
   letter-spacing: 0.04em;
 }
-
-/* Tags translúcidas (menos cansativas) */
-.tag-Massiva   { 
-  background: var(--tag-massiva); 
-  color: white;
-}
-
-.tag-pendencia { 
-  background: var(--tag-pendencia); 
-  color: white;
-}
+.tag-Massiva   { background: var(--tag-massiva); }
+.tag-pendencia { background: var(--tag-pendencia); }
 
 /* botões inline tabela */
 .btn-edit-desc {
   background: none;
   border: 1px solid var(--borda);
-  color: rgba(34, 197, 94, 0.85);
+  color: var(--verde-claro);
   border-radius: 4px;
   padding: 2px 7px;
   font-size: 0.78rem;
@@ -340,19 +324,19 @@ input:focus, select:focus, textarea:focus {
   flex-shrink: 0;
   transition: all 0.15s;
 }
-.btn-edit-desc:hover { background: rgba(21,128,61,0.18); border-color: rgba(34,197,94,0.45); }
+.btn-edit-desc:hover { background: rgba(45,138,87,0.18); border-color: var(--verde-claro); }
 
 .btn-delete {
   background: none;
-  border: 1px solid rgba(185,28,28,0.35);
-  color: rgba(185,28,28,0.85);
+  border: 1px solid rgba(192,57,43,0.3);
+  color: rgba(192,57,43,0.8);
   border-radius: 4px;
   padding: 2px 7px;
   font-size: 0.78rem;
   cursor: pointer;
   transition: all 0.15s;
 }
-.btn-delete:hover { background: rgba(185,28,28,0.16); border-color: rgba(185,28,28,0.65); color: #ef4444; }
+.btn-delete:hover { background: rgba(192,57,43,0.15); border-color: var(--danger); color: var(--danger); }
 
 .sem-tickets {
   text-align: center; padding: 12px;
