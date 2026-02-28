@@ -1,7 +1,4 @@
 // ===== form.js =====
-// Envia o ticket para o Supabase
-
-const REGIOES = ["NORTE", "SUL", "SERRA", "TAQUARI", "NOROESTE", "FRONTEIRA OESTE"];
 
 function mostrarAlerta(msg, erro = false) {
   const el = document.getElementById("alerta");
@@ -11,7 +8,7 @@ function mostrarAlerta(msg, erro = false) {
   setTimeout(() => el.classList.add("hidden"), 4000);
 }
 
-// ===== Auto-fill sigla e grupo ao selecionar cidade =====
+// Auto-fill sigla e grupo ao selecionar cidade
 document.getElementById("cidade").addEventListener("change", function () {
   const selected = this.options[this.selectedIndex];
   document.getElementById("sigla").value = selected.dataset.sigla || "";
@@ -19,16 +16,18 @@ document.getElementById("cidade").addEventListener("change", function () {
 
 // Pré-preenche data/hora atual
 const dataInput = document.getElementById("data_inicio");
-const agora = new Date();
-agora.setMinutes(agora.getMinutes() - agora.getTimezoneOffset());
-dataInput.value = agora.toISOString().slice(0, 16);
-
-// Limpar formulário
-document.getElementById("btn-limpar").addEventListener("click", () => {
-  document.getElementById("form-ticket").reset();
-  agora.setMinutes(agora.getMinutes() - agora.getTimezoneOffset());
+function setDataAtual() {
   dataInput.value = new Date(Date.now() - new Date().getTimezoneOffset() * 60000)
     .toISOString().slice(0, 16);
+}
+setDataAtual();
+
+// Limpar formulário — mantém o texto padrão da descrição
+document.getElementById("btn-limpar").addEventListener("click", () => {
+  document.getElementById("form-ticket").reset();
+  document.getElementById("regiao").value = "Região acionada, aguardando disponibilidade de equipe";
+  document.getElementById("sigla").value = "";
+  setDataAtual();
 });
 
 // Submit
@@ -53,14 +52,13 @@ document.getElementById("form-ticket").addEventListener("submit", async (e) => {
   const payload = {
     ttk:          document.getElementById("ttk").value.trim(),
     id_servico:   document.getElementById("id_servico").value.trim(),
-    sp:           document.getElementById("sp").value || null,
+    sp:           document.getElementById("sp").value.trim() || null,
     regiao:       document.getElementById("regiao").value.trim(),
     grupo_regiao: cidadeOpt.dataset.grupo || "SUL",
     data_inicio:  document.getElementById("data_inicio").value || null,
     cidade:       cidadeSelect.value,
     sigla:        document.getElementById("sigla").value.trim().toUpperCase(),
     tag:          tag.value,
-    tecnico:      document.getElementById("tecnico").value.trim(),
     atualizado_em: new Date().toISOString(),
   };
 
@@ -83,8 +81,9 @@ document.getElementById("form-ticket").addEventListener("submit", async (e) => {
 
     mostrarAlerta("✅ Ticket salvo com sucesso!");
     document.getElementById("form-ticket").reset();
-    dataInput.value = new Date(Date.now() - new Date().getTimezoneOffset() * 60000)
-      .toISOString().slice(0, 16);
+    document.getElementById("regiao").value = "Região acionada, aguardando disponibilidade de equipe";
+    document.getElementById("sigla").value = "";
+    setDataAtual();
 
   } catch (err) {
     console.error(err);
