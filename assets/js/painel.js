@@ -2,7 +2,7 @@
 // Busca, exibe e gerencia tickets do Supabase
 
 // Ordem das regiões na tabela
-const ORDEM_REGIOES = ["NORTE", "SUL", "SERRA", "TAQUARI", "NOROESTE", "FRONTEIRA OESTE"];
+const ORDEM_REGIOES = ["NORTE", "SUL", "SERRA", "TAQUARI"];
 
 let todosTickets = [];
 let ticketEditando = null;
@@ -72,13 +72,11 @@ function renderTabela() {
           <th>TTKs</th>
           <th>ID de Serviço</th>
           <th>SP</th>
-          <th class="col-regiao">REGIÃO</th>
           <th>Atualização</th>
           <th>Cidade</th>
           <th>Sigla</th>
           <th>TAG</th>
           <th>Dat. Início</th>
-          <th>Técnico atrib.</th>
           <th></th>
         </tr>
       </thead>
@@ -118,16 +116,11 @@ function renderTabela() {
           <td><strong>${t.ttk || "—"}</strong></td>
           <td>${t.id_servico || "—"}</td>
           <td>${t.sp || "—"}</td>
-          <td class="col-regiao">
-            <span class="col-regiao-texto">${t.regiao || "—"}</span>
-            <button class="btn-edit-regiao" data-id="${t.id}">✏️</button>
-          </td>
           <td>${dataAtual}</td>
           <td>${t.cidade || "—"}</td>
           <td>${t.sigla || "—"}</td>
           <td><span class="tag-badge ${tagClass}">${t.tag || "—"}</span></td>
           <td>${dataInicio}</td>
-          <td>${t.tecnico || "—"}</td>
           <td><button class="btn-delete" data-id="${t.id}" data-ttk="${t.ttk}">🗑️</button></td>
         `;
         tbody.appendChild(tr);
@@ -140,9 +133,6 @@ function renderTabela() {
   });
 
   // Eventos inline
-  wrapper.querySelectorAll(".btn-edit-regiao").forEach(btn => {
-    btn.addEventListener("click", () => abrirModalRegiao(btn.dataset.id));
-  });
   wrapper.querySelectorAll(".btn-delete").forEach(btn => {
     btn.addEventListener("click", () => abrirModalDelete(btn.dataset.id, btn.dataset.ttk));
   });
