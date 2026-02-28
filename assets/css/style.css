@@ -1,38 +1,29 @@
 /* ===== RESET & BASE ===== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-:root {
-  /* Base neutra (menos azul vibrante) */
-  --bg:            #0f172a;   /* slate 900 */
-  --bg2:           #111827;   /* slate 800 */
-  --bg3:           #1f2937;   /* slate 700 */
+::root {
+  --bg:            #1a1a2e;
+  --bg2:           #16213e;
+  --bg3:           #0f3460;
 
-  /* Verde menos saturado */
-  --verde:         #134e3a;   /* verde profundo */
-  --verde-claro:   #15803d;   /* verde 700 */
-  --verde-brilho:  #166534;   /* usado só para detalhe */
+  /* ✅ Novo verde (menos vibrante, mais confortável) */
+  --verde:         #134e3a;
+  --verde-claro:   #15803d;
+  --verde-brilho:  #166534;
 
-  /* Texto */
-  --texto:         #e5e7eb;   /* cinza claro, não branco puro */
-  --texto-dim:     #9ca3af;   /* slate 400 */
+  --texto:         #e0e0e0;
+  --texto-dim:     #9090a8;
+  --borda:         #2a4a6a;
+  --danger:        #c0392b;
 
-  /* Bordas mais suaves */
-  --borda:         #243244;
+--tag-massiva:   #e67e22;
+--tag-pendencia: #8e44ad;
 
-  /* Estados */
-  --danger:        #b91c1c;
+  --region-bg:     #1e3a5a;
+  --th-bg:         #162030;
 
-  /* Tags suavizadas (fallback, caso use sólido em algum lugar) */
-  --tag-massiva:   #b45309;   /* amber 700 */
-  --tag-pendencia: #6d28d9;   /* roxo menos vibrante */
-
-  /* Região */
-  --region-bg:     #1e293b;   /* slate 700 */
-  --th-bg:         #182230;   /* header mais discreto */
-
-  /* Interações sutis */
-  --hover-linha:   rgba(255,255,255,0.045);
-  --zebra:         rgba(255,255,255,0.025);
+  --hover-linha:   rgba(255,255,255,0.035);
+  --zebra:         rgba(255,255,255,0.02);
 }
 
 body {
@@ -326,13 +317,14 @@ input:focus, select:focus, textarea:focus {
 }
 
 /* Tags translúcidas (menos cansativas) */
-.tag-Massiva {
-  background: rgba(180, 83, 9, 0.18);
-  color: #f59e0b;
+.tag-Massiva   { 
+  background: var(--tag-massiva); 
+  color: white;
 }
-.tag-pendencia {
-  background: rgba(109, 40, 217, 0.18);
-  color: #a78bfa;
+
+.tag-pendencia { 
+  background: var(--tag-pendencia); 
+  color: white;
 }
 
 /* botões inline tabela */
