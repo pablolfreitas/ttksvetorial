@@ -8,17 +8,37 @@
 </head>
 <body>
   <header>
-    <h1>📋 Painel de Tickets</h1>
+    <h1>🔗 TTKs Fibrasil</h1>
     <nav>
       <a href="index.html" class="nav-btn">Abrir Ticket</a>
       <a href="painel.html" class="nav-btn active">📋 Painel</a>
       <a href="encerrados.html" class="nav-btn">✅ Encerrados</a>
       <a href="contatos.html" class="nav-btn">📞 Contatos</a>
+      <a href="logs.html" class="nav-btn">📄 Logs</a>
     </nav>
   </header>
 
   <main class="container-wide">
     <div class="painel-header">
+      <!-- Contadores centrais -->
+      <div class="contadores">
+        <div class="contador-item">
+          <span class="contador-valor" id="cnt-total">0</span>
+          <span class="contador-label">Total TTKs</span>
+        </div>
+        <div class="contador-sep"></div>
+        <div class="contador-item">
+          <span class="contador-valor massiva" id="cnt-massiva">0</span>
+          <span class="contador-label">Massiva</span>
+        </div>
+        <div class="contador-sep"></div>
+        <div class="contador-item">
+          <span class="contador-valor pendencia" id="cnt-pendencia">0</span>
+          <span class="contador-label">Pendência Téc.</span>
+        </div>
+      </div>
+
+      <!-- Botão + horário à direita -->
       <div class="painel-acoes">
         <button id="btn-atualizar" class="btn-secondary">🔄 Atualizar</button>
         <span id="ultima-atualizacao" class="info-text"></span>
