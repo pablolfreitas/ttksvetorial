@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Abertura de Tickets</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css">
   <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
@@ -28,16 +27,16 @@
           <label>ID Serviço</label>
           <input type="text" id="id_servico" placeholder="VIVO|UGN-66656664-069">
         </div>
-        <div class="field">
+        <div class="field field-sm">
           <label>SP</label>
-          <input type="number" id="sp" placeholder="138">
+          <input type="text" id="sp" placeholder="138, 294">
         </div>
       </div>
 
       <div class="form-row">
         <div class="field field-wide">
-          <label>Região *</label>
-          <input type="text" id="regiao" placeholder="Equipe em deslocamento..." required>
+          <label>Descrição *</label>
+          <input type="text" id="regiao" value="Região acionada, aguardando disponibilidade de equipe" required>
         </div>
         <div class="field">
           <label>Data Início *</label>
@@ -50,52 +49,48 @@
           <label>Cidade</label>
           <select id="cidade">
             <option value=""></option>
-            <!-- NORTE -->
-            <option value="Carazinho"      data-sigla="CIO" data-grupo="NORTE">Carazinho</option>
-            <option value="Cachoeira do Sul" data-sigla="CCR" data-grupo="NORTE">Cachoeira do Sul</option>
-            <option value="Erechim"        data-sigla="ERE" data-grupo="NORTE">Erechim</option>
-            <option value="Palmeira das Missões" data-sigla="PMM" data-grupo="NORTE">Palmeira das Missões</option>
-            <option value="Santa Rosa"     data-sigla="SRO" data-grupo="NORTE">Santa Rosa</option>
-            <option value="Santo Angelo"   data-sigla="SAN" data-grupo="NORTE">Santo Angelo</option>
-            <option value="Sarandi"        data-sigla="SRD" data-grupo="NORTE">Sarandi</option>
-            <option value="Três de Maio"   data-sigla="TMI" data-grupo="NORTE">Três de Maio</option>
-            <!-- SUL -->
-            <option value="Alegrete"       data-sigla="ALG" data-grupo="SUL">Alegrete</option>
-            <option value="Bagé"           data-sigla="BGE" data-grupo="SUL">Bagé</option>
-            <option value="Camaquã"        data-sigla="CAM" data-grupo="SUL">Camaquã</option>
-            <option value="Santana do Livramento" data-sigla="SIV" data-grupo="SUL">Santana do Livramento</option>
-            <option value="Uruguaiana"     data-sigla="UGN" data-grupo="SUL">Uruguaiana</option>
-            <!-- SERRA -->
-            <option value="Canela"         data-sigla="CEN" data-grupo="SERRA">Canela</option>
-            <option value="Capão da Canoa" data-sigla="KDK" data-grupo="SERRA">Capão da Canoa</option>
-            <option value="Carlos Barbosa" data-sigla="CLB" data-grupo="SERRA">Carlos Barbosa</option>
-            <option value="Dois Irmãos"    data-sigla="DSR" data-grupo="SERRA">Dois Irmãos</option>
-            <option value="Flores da Cunha" data-sigla="FCA" data-grupo="SERRA">Flores da Cunha</option>
-            <option value="Garibaldi"      data-sigla="GRD" data-grupo="SERRA">Garibaldi</option>
-            <option value="Gramado"        data-sigla="GDO" data-grupo="SERRA">Gramado</option>
-            <option value="Igrejinha"      data-sigla="IJH" data-grupo="SERRA">Igrejinha</option>
-            <option value="Ivoti"          data-sigla="IVO" data-grupo="SERRA">Ivoti</option>
-            <option value="Lagoa Vermelha" data-sigla="LVH" data-grupo="SERRA">Lagoa Vermelha</option>
-            <option value="Nova Petrópolis" data-sigla="NVP" data-grupo="SERRA">Nova Petrópolis</option>
-            <option value="Osório"         data-sigla="OSR" data-grupo="SERRA">Osório</option>
-            <option value="São Marcos"     data-sigla="SCS" data-grupo="SERRA">São Marcos</option>
-            <option value="Taquara"        data-sigla="TQR" data-grupo="SERRA">Taquara</option>
-            <option value="Torres"         data-sigla="TES" data-grupo="SERRA">Torres</option>
-            <option value="Tramandaí"      data-sigla="TRI" data-grupo="SERRA">Tramandaí</option>
-            <option value="Vacaria"        data-sigla="VAA" data-grupo="SERRA">Vacaria</option>
-            <option value="Veranópolis"    data-sigla="VNS" data-grupo="SERRA">Veranópolis</option>
-            <option value="Xangri-lá"      data-sigla="XNLA" data-grupo="SERRA">Xangri-lá</option>
-            <!-- TAQUARI -->
-            <option value="Charqueadas"    data-sigla="CQU" data-grupo="TAQUARI">Charqueadas</option>
-            <option value="Estrela"        data-sigla="ETA" data-grupo="TAQUARI">Estrela</option>
-            <option value="Lajeado"        data-sigla="LJO" data-grupo="TAQUARI">Lajeado</option>
-            <option value="Teutonia"       data-sigla="TUN" data-grupo="TAQUARI">Teutonia</option>
-            <option value="Venancio Aires" data-sigla="VAI" data-grupo="TAQUARI">Venancio Aires</option>
+            <option value="Carazinho"            data-sigla="CIO"  data-grupo="NORTE">Carazinho</option>
+            <option value="Cachoeira do Sul"      data-sigla="CCR"  data-grupo="NORTE">Cachoeira do Sul</option>
+            <option value="Erechim"               data-sigla="ERE"  data-grupo="NORTE">Erechim</option>
+            <option value="Palmeira das Missões"  data-sigla="PMM"  data-grupo="NORTE">Palmeira das Missões</option>
+            <option value="Santa Rosa"            data-sigla="SRO"  data-grupo="NORTE">Santa Rosa</option>
+            <option value="Santo Angelo"          data-sigla="SAN"  data-grupo="NORTE">Santo Angelo</option>
+            <option value="Sarandi"               data-sigla="SRD"  data-grupo="NORTE">Sarandi</option>
+            <option value="Três de Maio"          data-sigla="TMI"  data-grupo="NORTE">Três de Maio</option>
+            <option value="Alegrete"              data-sigla="ALG"  data-grupo="SUL">Alegrete</option>
+            <option value="Bagé"                  data-sigla="BGE"  data-grupo="SUL">Bagé</option>
+            <option value="Camaquã"               data-sigla="CAM"  data-grupo="SUL">Camaquã</option>
+            <option value="Santana do Livramento" data-sigla="SIV"  data-grupo="SUL">Santana do Livramento</option>
+            <option value="Uruguaiana"            data-sigla="UGN"  data-grupo="SUL">Uruguaiana</option>
+            <option value="Canela"                data-sigla="CEN"  data-grupo="SERRA">Canela</option>
+            <option value="Capão da Canoa"        data-sigla="KDK"  data-grupo="SERRA">Capão da Canoa</option>
+            <option value="Carlos Barbosa"        data-sigla="CLB"  data-grupo="SERRA">Carlos Barbosa</option>
+            <option value="Dois Irmãos"           data-sigla="DSR"  data-grupo="SERRA">Dois Irmãos</option>
+            <option value="Flores da Cunha"       data-sigla="FCA"  data-grupo="SERRA">Flores da Cunha</option>
+            <option value="Garibaldi"             data-sigla="GRD"  data-grupo="SERRA">Garibaldi</option>
+            <option value="Gramado"               data-sigla="GDO"  data-grupo="SERRA">Gramado</option>
+            <option value="Igrejinha"             data-sigla="IJH"  data-grupo="SERRA">Igrejinha</option>
+            <option value="Ivoti"                 data-sigla="IVO"  data-grupo="SERRA">Ivoti</option>
+            <option value="Lagoa Vermelha"        data-sigla="LVH"  data-grupo="SERRA">Lagoa Vermelha</option>
+            <option value="Nova Petrópolis"       data-sigla="NVP"  data-grupo="SERRA">Nova Petrópolis</option>
+            <option value="Osório"                data-sigla="OSR"  data-grupo="SERRA">Osório</option>
+            <option value="São Marcos"            data-sigla="SCS"  data-grupo="SERRA">São Marcos</option>
+            <option value="Taquara"               data-sigla="TQR"  data-grupo="SERRA">Taquara</option>
+            <option value="Torres"                data-sigla="TES"  data-grupo="SERRA">Torres</option>
+            <option value="Tramandaí"             data-sigla="TRI"  data-grupo="SERRA">Tramandaí</option>
+            <option value="Vacaria"               data-sigla="VAA"  data-grupo="SERRA">Vacaria</option>
+            <option value="Veranópolis"           data-sigla="VNS"  data-grupo="SERRA">Veranópolis</option>
+            <option value="Xangri-lá"             data-sigla="XNLA" data-grupo="SERRA">Xangri-lá</option>
+            <option value="Charqueadas"           data-sigla="CQU"  data-grupo="TAQUARI">Charqueadas</option>
+            <option value="Estrela"               data-sigla="ETA"  data-grupo="TAQUARI">Estrela</option>
+            <option value="Lajeado"               data-sigla="LJO"  data-grupo="TAQUARI">Lajeado</option>
+            <option value="Teutonia"              data-sigla="TUN"  data-grupo="TAQUARI">Teutonia</option>
+            <option value="Venancio Aires"        data-sigla="VAI"  data-grupo="TAQUARI">Venancio Aires</option>
           </select>
         </div>
-        <div class="field">
+        <div class="field field-sm">
           <label>Sigla</label>
-          <input type="text" id="sigla" placeholder="—" maxlength="5" readonly style="opacity:0.7;cursor:default;">
+          <input type="text" id="sigla" placeholder="—" maxlength="5" readonly style="opacity:0.65;cursor:default;">
         </div>
       </div>
 
@@ -104,13 +99,8 @@
           <label>TAG *</label>
           <div class="tags-group">
             <label class="tag-option"><input type="radio" name="tag" value="Massiva"> Massiva</label>
-            <label class="tag-option"><input type="radio" name="tag" value="NOC"> NOC</label>
             <label class="tag-option"><input type="radio" name="tag" value="Pendência Técnica"> Pendência Técnica</label>
           </div>
-        </div>
-        <div class="field">
-          <label>Técnico Atribuído</label>
-          <input type="text" id="tecnico" placeholder="Nome do técnico">
         </div>
       </div>
 
@@ -123,7 +113,6 @@
     <div id="alerta" class="alerta hidden"></div>
   </main>
 
-  <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
   <script src="assets/js/supabase-config.js"></script>
   <script src="assets/js/form.js"></script>
 </body>
