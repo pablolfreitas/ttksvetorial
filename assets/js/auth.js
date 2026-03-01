@@ -1,139 +1,145 @@
-// ===== auth.js =====
-// Sistema de autenticação simples usando tabela usuarios no Supabase
-// Senhas criptografadas com SHA-256 (leve, suficiente para uso interno)
+// ===== auth.js — Supabase Auth real (v2) =====
 
-// ===== UTILITÁRIOS =====
-async function sha256(str) {
-  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
-  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,"0")).join("");
+// ─── CLIENTE ──────────────────────────────────────────────────────────────────
+let _sb = null;
+function getClient() {
+  if (!_sb && typeof supabase !== 'undefined')
+    _sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  return _sb;
 }
 
-function setSession(usuario) {
-  sessionStorage.setItem("fibrasil_user", JSON.stringify(usuario));
-}
-function getSession() {
-  try { return JSON.parse(sessionStorage.getItem("fibrasil_user")); } catch { return null; }
-}
-function clearSession() {
-  sessionStorage.removeItem("fibrasil_user");
+// ─── SESSÃO ───────────────────────────────────────────────────────────────────
+async function getSession() {
+  const c = getClient(); if (!c) return null;
+  const { data } = await c.auth.getSession();
+  return data?.session ?? null;
 }
 
-// ===== CONTADOR DE TTKs NA TELA DE LOGIN =====
-async function carregarContadorTTKs() {
-  try {
-    const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/tickets?select=id`,
-      { headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}` } }
-    );
-    const dados = await res.json();
-    const el = document.getElementById("ttk-total");
-    if (el) el.textContent = Array.isArray(dados) ? dados.length : "—";
-  } catch { /* silencioso */ }
+async function getPerfil(uid) {
+  const c = getClient(); if (!c) return null;
+  const { data } = await c.from('perfis')
+    .select('nome,role,ativo')
+    .eq('id', uid)
+    .maybeSingle();
+  return data;
 }
 
-// ===== MOSTRAR MENSAGENS =====
-function loginErro(msg) {
-  const el = document.getElementById("login-erro");
-  el.textContent = msg; el.classList.remove("hidden");
-  setTimeout(() => el.classList.add("hidden"), 4000);
+// ─── PROTEÇÃO DE PÁGINA ───────────────────────────────────────────────────────
+// Coloque no topo de cada página protegida:
+//   guardPage(['admin_master','admin','editor'])
+async function guardPage(rolesPermitidas) {
+  const session = await getSession();
+  if (!session) { window.location.replace('index.html'); return null; }
+  const perfil = await getPerfil(session.user.id);
+  if (!perfil || !perfil.ativo || !rolesPermitidas.includes(perfil.role)) {
+    window.location.replace('index.html'); return null;
+  }
+  return { session, perfil };
 }
-function loginOk(msg) {
-  const el = document.getElementById("login-ok");
-  el.textContent = msg; el.classList.remove("hidden");
+
+// ─── LOGOUT ───────────────────────────────────────────────────────────────────
+async function logout() {
+  const c = getClient();
+  if (c) await c.auth.signOut();
+  sessionStorage.clear();
+  window.location.replace('index.html');
 }
 
-// ===== TOGGLE SENHA =====
-document.getElementById("eye-login")?.addEventListener("click", () => {
-  const inp = document.getElementById("l-senha");
-  inp.type = inp.type === "password" ? "text" : "password";
-});
+// ─── UTILITÁRIOS DE MENSAGEM ──────────────────────────────────────────────────
+function _msg(id, txt) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = txt;
+  el.classList.remove('hidden');
+}
+function _msgErro(txt) { _msg('login-erro', txt); setTimeout(() => document.getElementById('login-erro')?.classList.add('hidden'), 5000); }
+function _msgOk(txt)   { _msg('login-ok', txt); }
 
-// ===== ALTERNÂNCIA DE FORMULÁRIOS =====
-document.getElementById("link-esqueci")?.addEventListener("click", e => {
-  e.preventDefault();
-  document.getElementById("form-login").classList.add("hidden");
-  document.getElementById("form-esqueci").classList.remove("hidden");
-});
-document.getElementById("link-voltar-login")?.addEventListener("click", e => {
-  e.preventDefault();
-  document.getElementById("form-esqueci").classList.add("hidden");
-  document.getElementById("form-login").classList.remove("hidden");
-});
+// ─── PÁGINA DE LOGIN ──────────────────────────────────────────────────────────
+async function iniciarPaginaLogin() {
+  const c = getClient();
 
-// ===== LOGIN =====
-document.getElementById("btn-entrar")?.addEventListener("click", async () => {
-  const email = document.getElementById("l-email").value.trim().toLowerCase();
-  const senha = document.getElementById("l-senha").value;
+  // Se já tem sessão válida → vai direto ao painel
+  const session = await getSession();
+  if (session) { window.location.replace('painel.html'); return; }
 
-  if (!email || !senha) { loginErro("Preencha e-mail e senha."); return; }
+  // Contador de TTKs (anon — só funciona se a policy de SELECT permitir anon ou viewer)
+  fetch(`${SUPABASE_URL}/rest/v1/tickets?select=id`, {
+    headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` }
+  }).then(r => r.ok ? r.json() : [])
+    .then(d => { const el = document.getElementById('ttk-total'); if (el) el.textContent = d.length ?? '—'; })
+    .catch(() => {});
 
-  const btn = document.getElementById("btn-entrar");
-  btn.disabled = true; btn.textContent = "Verificando...";
+  // Toggle senha
+  document.getElementById('eye-login')?.addEventListener('click', () => {
+    const i = document.getElementById('l-senha');
+    i.type = i.type === 'password' ? 'text' : 'password';
+  });
 
-  try {
-    const hash = await sha256(senha);
-    const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/usuarios?email=eq.${encodeURIComponent(email)}&select=*`,
-      { headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}` } }
-    );
-    const dados = await res.json();
+  // Alternar formulários
+  document.getElementById('link-esqueci')?.addEventListener('click', e => {
+    e.preventDefault();
+    document.getElementById('form-login').classList.add('hidden');
+    document.getElementById('form-esqueci').classList.remove('hidden');
+  });
+  document.getElementById('link-voltar-login')?.addEventListener('click', e => {
+    e.preventDefault();
+    document.getElementById('form-esqueci').classList.add('hidden');
+    document.getElementById('form-login').classList.remove('hidden');
+  });
 
-    if (!dados.length) { loginErro("E-mail não encontrado."); return; }
+  // Permitir Enter para logar
+  document.getElementById('l-senha')?.addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('btn-entrar')?.click();
+  });
 
-    const u = dados[0];
+  // ── LOGIN ──
+  document.getElementById('btn-entrar')?.addEventListener('click', async () => {
+    const email = document.getElementById('l-email').value.trim();
+    const senha = document.getElementById('l-senha').value;
+    if (!email || !senha) { _msgErro('Preencha e-mail e senha.'); return; }
 
-    // Admin master: senha em texto puro no banco (visível pelo Supabase)
-    // Demais: senha em SHA-256
-    const senhaOk = u.role === "admin_master"
-      ? (senha === u.senha_hash)           // master: comparação direta
-      : (hash === u.senha_hash);           // outros: hash SHA-256
+    const btn = document.getElementById('btn-entrar');
+    btn.disabled = true; btn.textContent = 'Verificando...';
 
-    if (!senhaOk) { loginErro("Senha incorreta."); return; }
-    if (!u.ativo) { loginErro("Usuário desativado. Contate o administrador."); return; }
+    const { data, error } = await c.auth.signInWithPassword({ email, password: senha });
 
-    setSession({ id: u.id, nome: u.nome, email: u.email, role: u.role });
-
-    // Redireciona conforme o papel
-    if (u.role === "admin_master" || u.role === "admin") {
-      window.location.href = "painel.html";
-    } else {
-      window.location.href = "painel.html?modo=visualizacao";
+    if (error) {
+      _msgErro('E-mail ou senha incorretos.');
+      btn.disabled = false; btn.textContent = 'Entrar'; return;
     }
 
-  } catch (err) {
-    loginErro("Erro ao conectar. Tente novamente.");
-    console.error(err);
-  } finally {
-    btn.disabled = false; btn.textContent = "Entrar";
-  }
-});
+    const perfil = await getPerfil(data.user.id);
+    if (!perfil || !perfil.ativo) {
+      await c.auth.signOut();
+      _msgErro('Usuário desativado. Contate o administrador.');
+      btn.disabled = false; btn.textContent = 'Entrar'; return;
+    }
 
-// ===== ESQUECI SENHA — envia e-mail via Supabase Edge (simulado: mostra na tela) =====
-document.getElementById("btn-esqueci")?.addEventListener("click", async () => {
-  const email = document.getElementById("e-email").value.trim().toLowerCase();
-  if (!email) { loginErro("Informe seu e-mail."); return; }
+    // Guarda role na session para uso local (não é segurança — só conveniência de UI)
+    sessionStorage.setItem('fb_role', perfil.role);
+    sessionStorage.setItem('fb_nome', perfil.nome || email);
 
-  const btn = document.getElementById("btn-esqueci");
-  btn.disabled = true; btn.textContent = "Buscando...";
+    window.location.replace('painel.html');
+  });
 
-  try {
-    const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/usuarios?email=eq.${encodeURIComponent(email)}&select=nome`,
-      { headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}` } }
-    );
-    const dados = await res.json();
-    if (!dados.length) { loginErro("E-mail não encontrado."); return; }
+  // ── ESQUECI SENHA — usa reset nativo do Supabase (envia e-mail real) ──
+  document.getElementById('btn-esqueci')?.addEventListener('click', async () => {
+    const email = document.getElementById('e-email').value.trim();
+    if (!email) { _msgErro('Informe seu e-mail.'); return; }
 
-    // Por enquanto exibe confirmação — integração com e-mail pode ser adicionada via Edge Function
-    loginOk(`✅ Se o e-mail "${email}" estiver cadastrado, entre em contato com o administrador para recuperar sua senha.`);
-    document.getElementById("form-esqueci").classList.add("hidden");
+    const btn = document.getElementById('btn-esqueci');
+    btn.disabled = true; btn.textContent = 'Enviando...';
 
-  } catch(err) {
-    loginErro("Erro ao buscar. Tente novamente.");
-  } finally {
-    btn.disabled = false; btn.textContent = "Enviar senha";
-  }
-});
+    const { error } = await c.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + '/alterar-senha.html'
+    });
 
-// ===== INICIALIZAÇÃO =====
-carregarContadorTTKs();
+    btn.disabled = false; btn.textContent = 'Enviar link';
+
+    if (error) { _msgErro('Erro ao enviar. Verifique o e-mail.'); return; }
+
+    _msgOk('✅ Link enviado! Verifique sua caixa de entrada.');
+    document.getElementById('form-esqueci').classList.add('hidden');
+  });
+}
