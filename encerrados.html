@@ -3,24 +3,76 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tickets Encerrados</title>
+  <title>Encerrados — TTKs Fibrasil</title>
   <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
   <header>
-    <h1>🎫 Sistema de Tickets</h1>
+    <h1>🔗 TTKs Fibrasil</h1>
     <nav>
       <a href="index.html" class="nav-btn">Abrir Ticket</a>
       <a href="painel.html" class="nav-btn">📋 Painel</a>
       <a href="encerrados.html" class="nav-btn active">✅ Encerrados</a>
       <a href="contatos.html" class="nav-btn">📞 Contatos</a>
+      <a href="logs.html" class="nav-btn">📄 Logs</a>
     </nav>
   </header>
+
   <main class="container-wide">
-    <div class="pagina-construcao">
-      <h2>✅ Tickets Encerrados</h2>
-      <p>Esta página está em desenvolvimento. Em breve você poderá consultar o histórico de tickets encerrados aqui.</p>
+    <div class="painel-header">
+      <h2 style="font-size:1rem;color:var(--texto-dim);font-weight:600;">Tickets Encerrados</h2>
+      <div class="painel-acoes">
+        <button id="btn-atualizar" class="btn-secondary">🔄 Atualizar</button>
+        <span id="ultima-atualizacao" class="info-text"></span>
+      </div>
     </div>
+    <div id="enc-wrapper"><div class="loading">Carregando...</div></div>
   </main>
+
+  <div id="alerta" class="alerta hidden"></div>
+  <script src="assets/js/supabase-config.js"></script>
+  <script>
+  async function carregar() {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/encerrados?select=*&order=encerrado_em.desc`,
+      { headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}` } }
+    );
+    const dados = await res.json();
+    const w = document.getElementById("enc-wrapper");
+    const agora = new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
+    document.getElementById("ultima-atualizacao").textContent = "Atualizado às " + agora;
+
+    if (!dados.length) { w.innerHTML = `<div class="loading">Nenhum ticket encerrado ainda.</div>`; return; }
+
+    const rows = dados.map(t => {
+      const tagClass = t.tag === "Massiva" ? "tag-Massiva" : "tag-pendencia";
+      const di = t.data_inicio ? new Date(t.data_inicio).toLocaleDateString("pt-BR") : "—";
+      const enc = t.encerrado_em ? new Date(t.encerrado_em).toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}) : "—";
+      let slaCor = "#2ecc71";
+      if (t.sla_pct >= 80) slaCor = "#e74c3c";
+      else if (t.sla_pct >= 50) slaCor = "#f39c12";
+      return `<tr>
+        <td class="cell-mono">${t.ttk}</td>
+        <td class="cell-mono">${t.id_servico || "—"}</td>
+        <td>${t.cidade || "—"}</td>
+        <td><span class="tag-badge ${tagClass}">${t.tag || "—"}</span></td>
+        <td><span style="color:${slaCor};font-weight:700;">${t.sla_pct != null ? t.sla_pct+"%" : "—"}</span>
+            <span style="font-size:0.75rem;color:var(--texto-dim);margin-left:4px;">${t.sla_horas || ""}</span></td>
+        <td>${di}</td>
+        <td>${enc}</td>
+      </tr>`;
+    }).join("");
+
+    w.innerHTML = `<table class="tickets-table" style="width:100%;">
+      <thead><tr>
+        <th>TTK</th><th>ID Serviço</th><th>Cidade</th>
+        <th>TAG</th><th>SLA Final</th><th>Dat. Início</th><th>Encerrado em</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+  }
+  document.getElementById("btn-atualizar").addEventListener("click", carregar);
+  carregar();
+  </script>
 </body>
 </html>
