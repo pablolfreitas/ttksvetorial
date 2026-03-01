@@ -178,6 +178,18 @@ document.getElementById("form-ticket").addEventListener("submit", async (e) => {
       throw new Error(err.message || "Erro ao salvar");
     }
 
+    // Registra log de inserção
+    await fetch(`${SUPABASE_URL}/rest/v1/logs`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": SUPABASE_KEY,
+        "Authorization": `Bearer ${SUPABASE_KEY}`,
+        "Prefer": "return=minimal"
+      },
+      body: JSON.stringify({ acao: "INSERÇÃO", ttk: dados.ttk, detalhe: dados.cidade, usuario: "sistema" })
+    });
+
     document.getElementById("mascara-texto").value = gerarMascara(dados);
     mostrarAlerta("✅ Ticket salvo! Máscara gerada.");
 
