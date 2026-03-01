@@ -1,6 +1,7 @@
 // ===== painel.js =====
 
 const ORDEM_REGIOES = ["NORTE", "SUL", "SERRA", "TAQUARI"];
+const USUARIO = "sistema"; // futuramente virá do login
 
 let todosTickets = [];
 let ticketEditando = null;
@@ -30,7 +31,6 @@ function atualizarContadores() {
   const total    = todosTickets.length;
   const massiva  = todosTickets.filter(t => t.tag === "Massiva").length;
   const pendencia = todosTickets.filter(t => t.tag === "Pendência Técnica").length;
-
   document.getElementById("cnt-total").textContent    = total;
   document.getElementById("cnt-massiva").textContent  = massiva;
   document.getElementById("cnt-pendencia").textContent = pendencia;
@@ -42,7 +42,7 @@ function calcularSLA(ticket) {
   const limitHoras = ticket.tag === "Massiva" ? 8 : 24;
   const inicio     = new Date(ticket.data_inicio);
   const agora      = new Date();
-  const decorrido  = (agora - inicio) / (1000 * 60 * 60); // horas
+  const decorrido  = (agora - inicio) / (1000 * 60 * 60);
   const pct        = Math.min(Math.round((decorrido / limitHoras) * 100), 100);
   return { pct, limitHoras, decorrido: decorrido.toFixed(1) };
 }
@@ -50,12 +50,10 @@ function calcularSLA(ticket) {
 function slaBar(ticket) {
   const s = calcularSLA(ticket);
   if (!s) return `<span style="color:var(--texto-dim);font-size:0.78rem;">—</span>`;
-
-  let cor, label;
-  if (s.pct < 50)      { cor = "#2ecc71"; label = "verde"; }
-  else if (s.pct < 80) { cor = "#f39c12"; label = "amarelo"; }
-  else                 { cor = "#e74c3c"; label = "vermelho"; }
-
+  let cor;
+  if (s.pct < 50)      cor = "#2ecc71";
+  else if (s.pct < 80) cor = "#f39c12";
+  else                  cor = "#e74c3c";
   return `
     <div class="sla-wrap" title="${s.decorrido}h / ${s.limitHoras}h">
       <div class="sla-bar-bg">
@@ -78,38 +76,20 @@ function renderTabela() {
   const wrapper = document.getElementById("tabela-wrapper");
   wrapper.innerHTML = "";
 
-  const COLGROUP = `
-    <colgroup>
-      <col style="width:155px">
-      <col style="width:200px">
-      <col style="width:60px">
-      <col>
-      <col style="width:130px">
-      <col style="width:148px">
-      <col style="width:155px">
-      <col style="width:138px">
-      <col style="width:36px">
-    </colgroup>`;
+  const COLGROUP = `<colgroup>
+    <col style="width:155px"><col style="width:200px"><col style="width:60px">
+    <col><col style="width:130px"><col style="width:148px">
+    <col style="width:155px"><col style="width:138px"><col style="width:70px">
+  </colgroup>`;
 
-  const THEAD = `
-    <thead>
-      <tr>
-        <th>TTKs</th>
-        <th>ID de Serviço</th>
-        <th>SP</th>
-        <th>Descrição</th>
-        <th>SLA</th>
-        <th>Cidade</th>
-        <th>TAG</th>
-        <th>Dat. Início</th>
-        <th></th>
-      </tr>
-    </thead>`;
+  const THEAD = `<thead><tr>
+    <th>TTKs</th><th>ID de Serviço</th><th>SP</th>
+    <th>Descrição</th><th>SLA</th><th>Cidade</th>
+    <th>TAG</th><th>Dat. Início</th><th></th>
+  </tr></thead>`;
 
-  wrapper.insertAdjacentHTML("beforeend", `
-    <table class="tickets-table" style="margin-bottom:0; table-layout:fixed; width:100%;">
-      ${COLGROUP}${THEAD}
-    </table>`);
+  wrapper.insertAdjacentHTML("beforeend",
+    `<table class="tickets-table" style="margin-bottom:0;table-layout:fixed;width:100%;">${COLGROUP}${THEAD}</table>`);
 
   Object.entries(grupos).forEach(([nomeGrupo, lista]) => {
     const div = document.createElement("div");
@@ -122,19 +102,12 @@ function renderTabela() {
 
     const table = document.createElement("table");
     table.className = "tickets-table";
-    table.style.cssText = "table-layout:fixed; width:100%;";
-    table.innerHTML = `
-      <colgroup>
-        <col style="width:155px">
-        <col style="width:200px">
-        <col style="width:60px">
-        <col>
-        <col style="width:130px">
-        <col style="width:148px">
-        <col style="width:155px">
-        <col style="width:138px">
-        <col style="width:36px">
-      </colgroup>`;
+    table.style.cssText = "table-layout:fixed;width:100%;";
+    table.innerHTML = `<colgroup>
+      <col style="width:155px"><col style="width:200px"><col style="width:60px">
+      <col><col style="width:130px"><col style="width:148px">
+      <col style="width:155px"><col style="width:138px"><col style="width:70px">
+    </colgroup>`;
 
     const tbody = document.createElement("tbody");
 
@@ -146,7 +119,7 @@ function renderTabela() {
       lista.forEach(t => {
         const tagClass   = t.tag === "Massiva" ? "tag-Massiva" : "tag-pendencia";
         const dataInicio = t.data_inicio ? formatarData(t.data_inicio) : "—";
-        const descHtml   = (t.regiao || "—").replace(/\n/g, "<br>");
+        const descHtml   = (t.regiao || "—");
         const spVal      = t.sp || "—";
         const spClass    = spVal.split(",").length >= 3 ? "cell-sp cell-sp-wrap" : "cell-sp";
         const atualizadoHora = t.atualizado_em
@@ -160,19 +133,20 @@ function renderTabela() {
           <td class="${spClass}">${spVal}</td>
           <td class="col-descricao">
             <div class="desc-inner">
-              <span class="descricao-texto">${descHtml}</span>
+              <span class="descricao-texto" title="${descHtml.replace(/"/g,"'")}">${descHtml}</span>
               <div class="desc-footer">
                 <span class="atualizado-label">${atualizadoHora ? "atualizado às " + atualizadoHora : ""}</span>
-                <button class="btn-edit-desc" data-id="${t.id}" title="Editar descrição">✏️ editar</button>
+                <button class="btn-edit-desc" data-id="${t.id}" title="Editar descrição">Editar</button>
               </div>
             </div>
           </td>
-          <td class="cell-sla">${slaBar(t)}</td>
+          <td>${slaBar(t)}</td>
           <td class="cell-center">${t.cidade || "—"}</td>
           <td class="cell-center"><span class="tag-badge ${tagClass}">${t.tag || "—"}</span></td>
           <td class="cell-center">${dataInicio}</td>
-          <td><button class="btn-delete" data-id="${t.id}" data-ttk="${t.ttk}" title="Apagar">🗑️</button></td>
-        `;
+          <td class="cell-acoes">
+            <button class="btn-delete" data-id="${t.id}" data-ttk="${t.ttk}" title="Remover">🗑</button>
+          </td>`;
         tbody.appendChild(tr);
       });
     }
@@ -199,7 +173,23 @@ function formatarData(iso) {
   return `${dia} ${hora}`;
 }
 
-// ===== MODAL EDITAR DESCRIÇÃO =====
+// ===== LOG =====
+async function registrarLog(acao, ttk, detalhe = "") {
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/logs`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": SUPABASE_KEY,
+        "Authorization": `Bearer ${SUPABASE_KEY}`,
+        "Prefer": "return=minimal"
+      },
+      body: JSON.stringify({ acao, ttk, detalhe, usuario: USUARIO })
+    });
+  } catch (e) { console.warn("Log falhou:", e); }
+}
+
+// ===== MODAL EDITAR =====
 function abrirModalDescricao(id) {
   ticketEditando = todosTickets.find(t => t.id == id);
   if (!ticketEditando) return;
@@ -231,6 +221,7 @@ document.getElementById("modal-salvar").addEventListener("click", async () => {
       body: JSON.stringify({ regiao: novoTexto, atualizado_em: new Date().toISOString() })
     });
     if (!res.ok) throw new Error("Erro ao atualizar");
+    await registrarLog("EDIÇÃO", ticketEditando.ttk, "Descrição atualizada");
     const idx = todosTickets.findIndex(t => t.id == ticketEditando.id);
     if (idx >= 0) {
       todosTickets[idx].regiao = novoTexto;
@@ -242,12 +233,10 @@ document.getElementById("modal-salvar").addEventListener("click", async () => {
     mostrarAlerta("✅ Descrição atualizada!");
   } catch (err) {
     mostrarAlerta("❌ " + err.message, true);
-  } finally {
-    btn.disabled = false;
-  }
+  } finally { btn.disabled = false; }
 });
 
-// ===== MODAL DELETAR =====
+// ===== MODAL DELETAR/ENCERRAR =====
 function abrirModalDelete(id, ttk) {
   ticketDeletando = id;
   document.getElementById("delete-ttk").textContent = ttk;
@@ -259,27 +248,81 @@ document.getElementById("delete-cancelar").addEventListener("click", () => {
   ticketDeletando = null;
 });
 
+// Botão: Finalizado pela equipe → salva em encerrados e deleta do painel
+document.getElementById("delete-finalizar").addEventListener("click", async () => {
+  if (!ticketDeletando) return;
+  const btn = document.getElementById("delete-finalizar");
+  btn.disabled = true;
+  const ticket = todosTickets.find(t => t.id == ticketDeletando);
+  const sla = ticket ? calcularSLA(ticket) : null;
+
+  try {
+    // 1. Salva em encerrados
+    if (ticket) {
+      await fetch(`${SUPABASE_URL}/rest/v1/encerrados`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": SUPABASE_KEY,
+          "Authorization": `Bearer ${SUPABASE_KEY}`,
+          "Prefer": "return=minimal"
+        },
+        body: JSON.stringify({
+          ttk:         ticket.ttk,
+          id_servico:  ticket.id_servico,
+          cidade:      ticket.cidade,
+          tag:         ticket.tag,
+          sla_pct:     sla ? sla.pct : null,
+          sla_horas:   sla ? `${sla.decorrido}h / ${sla.limitHoras}h` : null,
+          data_inicio: ticket.data_inicio,
+          usuario:     USUARIO
+        })
+      });
+    }
+
+    // 2. Deleta do painel
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/tickets?id=eq.${ticketDeletando}`, {
+      method: "DELETE",
+      headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}` }
+    });
+    if (!res.ok) throw new Error("Erro ao remover ticket");
+
+    // 3. Registra log
+    await registrarLog("ENCERRADO", ticket?.ttk, `SLA: ${sla ? sla.pct + "%" : "—"}`);
+
+    todosTickets = todosTickets.filter(t => t.id != ticketDeletando);
+    document.getElementById("modal-delete").classList.add("hidden");
+    ticketDeletando = null;
+    renderTabela();
+    atualizarContadores();
+    mostrarAlerta("✅ Ticket finalizado e salvo em Encerrados.");
+  } catch (err) {
+    mostrarAlerta("❌ " + err.message, true);
+  } finally { btn.disabled = false; }
+});
+
+// Botão: Deletar do painel (sem salvar)
 document.getElementById("delete-confirmar").addEventListener("click", async () => {
   if (!ticketDeletando) return;
   const btn = document.getElementById("delete-confirmar");
   btn.disabled = true;
+  const ticket = todosTickets.find(t => t.id == ticketDeletando);
   try {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/tickets?id=eq.${ticketDeletando}`, {
       method: "DELETE",
       headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}` }
     });
     if (!res.ok) throw new Error("Erro ao deletar");
+    await registrarLog("DELETE", ticket?.ttk, "Removido sem encerrar");
     todosTickets = todosTickets.filter(t => t.id != ticketDeletando);
     document.getElementById("modal-delete").classList.add("hidden");
     ticketDeletando = null;
     renderTabela();
     atualizarContadores();
-    mostrarAlerta("🗑️ Ticket removido.");
+    mostrarAlerta("🗑️ Ticket removido do painel.");
   } catch (err) {
     mostrarAlerta("❌ " + err.message, true);
-  } finally {
-    btn.disabled = false;
-  }
+  } finally { btn.disabled = false; }
 });
 
 // ===== ALERTA =====
@@ -292,9 +335,6 @@ function mostrarAlerta(msg, erro = false) {
 }
 
 document.getElementById("btn-atualizar").addEventListener("click", carregarTickets);
-
-// Recalcula barras SLA a cada minuto sem buscar do banco
 setInterval(() => { if (todosTickets.length) renderTabela(); }, 60000);
-
 carregarTickets();
 setInterval(carregarTickets, 30000);
