@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Abertura de Tickets</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <header>
+    <h1>🔗 TTKs Fibrasil</h1>
+    <nav>
+      <a href="index.html" class="nav-btn active">Abrir Ticket</a>
+      <a href="painel.html" class="nav-btn">Painel</a>
+      <a href="encerrados.html" class="nav-btn">Encerrados</a>
+      <a href="contatos.html" class="nav-btn">Contatos</a>
+      <a href="logs.html" class="nav-btn">Logs</a>
+    </nav>
+  </header>
+
+  <main class="container-form">
+    <div class="form-wrapper">
+      <form id="form-ticket">
+
+        <div class="form-row">
+          <div class="field">
+            <label>TTK *</label>
+            <input type="text" id="ttk" placeholder="TT_00021052/2026" required>
+          </div>
+          <div class="field">
+            <label>ID Serviço</label>
+            <input type="text" id="id_servico" placeholder="VIVO|UGN-66656664-069">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="field field-sm">
+            <label>ARD</label>
+            <input type="text" id="ard" placeholder="RSVAI_G1I01" maxlength="15">
+          </div>
+          <div class="field field-sm">
+            <label>SP</label>
+            <input type="text" id="sp" placeholder="138, 294">
+          </div>
+          <div class="field field-sm">
+            <label>Clientes Afetados</label>
+            <input type="number" id="clientes" placeholder="0" min="0" max="999">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="field">
+            <label>CTOs</label>
+            <input type="text" id="cto" placeholder="CTO-001, CTO-002..." maxlength="120">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="field">
+            <label>Rua</label>
+            <input type="text" id="rua" placeholder="Rua das Flores, 123">
+          </div>
+          <div class="field">
+            <label>Bairro</label>
+            <input type="text" id="bairro" placeholder="Centro">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="field">
+            <label>Cidade</label>
+            <select id="cidade">
+              <option value=""></option>
+              <!-- Ordem alfabética com acentos corretos -->
+              <option value="Alegrete"              data-sigla="ALG"  data-grupo="SUL">Alegrete</option>
+              <option value="Bagé"                  data-sigla="BGE"  data-grupo="SUL">Bagé</option>
+              <option value="Cachoeira do Sul"      data-sigla="CCR"  data-grupo="NORTE">Cachoeira do Sul</option>
+              <option value="Camaquã"               data-sigla="CAM"  data-grupo="SUL">Camaquã</option>
+              <option value="Canela"                data-sigla="CEN"  data-grupo="SERRA">Canela</option>
+              <option value="Capão da Canoa"        data-sigla="KDK"  data-grupo="SERRA">Capão da Canoa</option>
+              <option value="Carazinho"             data-sigla="CIO"  data-grupo="NORTE">Carazinho</option>
+              <option value="Carlos Barbosa"        data-sigla="CLB"  data-grupo="SERRA">Carlos Barbosa</option>
+              <option value="Charqueadas"           data-sigla="CQU"  data-grupo="TAQUARI">Charqueadas</option>
+              <option value="Dois Irmãos"           data-sigla="DSR"  data-grupo="SERRA">Dois Irmãos</option>
+              <option value="Erechim"               data-sigla="ERE"  data-grupo="NORTE">Erechim</option>
+              <option value="Estrela"               data-sigla="ETA"  data-grupo="TAQUARI">Estrela</option>
+              <option value="Flores da Cunha"       data-sigla="FCA"  data-grupo="SERRA">Flores da Cunha</option>
+              <option value="Garibaldi"             data-sigla="GRD"  data-grupo="SERRA">Garibaldi</option>
+              <option value="Gramado"               data-sigla="GDO"  data-grupo="SERRA">Gramado</option>
+              <option value="Igrejinha"             data-sigla="IJH"  data-grupo="SERRA">Igrejinha</option>
+              <option value="Ijuí"                  data-sigla="IJU"  data-grupo="NORTE">Ijuí</option>
+              <option value="Ivoti"                 data-sigla="IVO"  data-grupo="SERRA">Ivoti</option>
+              <option value="Lagoa Vermelha"        data-sigla="LVH"  data-grupo="SERRA">Lagoa Vermelha</option>
+              <option value="Lajeado"               data-sigla="LJO"  data-grupo="TAQUARI">Lajeado</option>
+              <option value="Nova Petrópolis"       data-sigla="NVP"  data-grupo="SERRA">Nova Petrópolis</option>
+              <option value="Osório"                data-sigla="OSR"  data-grupo="SERRA">Osório</option>
+              <option value="Palmeira das Missões"  data-sigla="PMM"  data-grupo="NORTE">Palmeira das Missões</option>
+              <option value="Santa Rosa"            data-sigla="SRO"  data-grupo="NORTE">Santa Rosa</option>
+              <option value="Santana do Livramento" data-sigla="SIV"  data-grupo="SUL">Santana do Livramento</option>
+              <option value="Santo Ângelo"          data-sigla="SAN"  data-grupo="NORTE">Santo Ângelo</option>
+              <option value="São Marcos"            data-sigla="SCS"  data-grupo="SERRA">São Marcos</option>
+              <option value="Sarandi"               data-sigla="SRD"  data-grupo="NORTE">Sarandi</option>
+              <option value="Taquara"               data-sigla="TQR"  data-grupo="SERRA">Taquara</option>
+              <option value="Teutônia"              data-sigla="TUN"  data-grupo="TAQUARI">Teutônia</option>
+              <option value="Torres"                data-sigla="TES"  data-grupo="SERRA">Torres</option>
+              <option value="Tramandaí"             data-sigla="TRI"  data-grupo="SERRA">Tramandaí</option>
+              <option value="Três de Maio"          data-sigla="TMI"  data-grupo="NORTE">Três de Maio</option>
+              <option value="Uruguaiana"            data-sigla="UGN"  data-grupo="SUL">Uruguaiana</option>
+              <option value="Vacaria"               data-sigla="VAA"  data-grupo="SERRA">Vacaria</option>
+              <option value="Venâncio Aires"        data-sigla="VAI"  data-grupo="TAQUARI">Venâncio Aires</option>
+              <option value="Veranópolis"           data-sigla="VNS"  data-grupo="SERRA">Veranópolis</option>
+              <option value="Xangri-lá"             data-sigla="XNLA" data-grupo="SERRA">Xangri-lá</option>
+            </select>
+          </div>
+          <div class="field field-sm">
+            <label>Sigla</label>
+            <input type="text" id="sigla" placeholder="—" maxlength="5" readonly style="opacity:0.6;cursor:default;">
+          </div>
+          <div class="field">
+            <label>Data Início *</label>
+            <input type="datetime-local" id="data_inicio" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="field">
+            <label>Descrição (painel) *</label>
+            <input type="text" id="regiao" value="Região acionada, aguardando disponibilidade de equipe" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="field">
+            <label>Observações para a equipe</label>
+            <textarea id="obs" rows="3" placeholder="Informações adicionais, cuidados, detalhes relevantes para a equipe..." maxlength="600"></textarea>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="field">
+            <label>TAG *</label>
+            <div class="tags-group">
+              <label class="tag-option"><input type="radio" name="tag" value="Massiva"> Massiva</label>
+              <label class="tag-option"><input type="radio" name="tag" value="Pendência Técnica"> Pendência Técnica</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" id="btn-enviar" class="btn-primary">✅ Salvar e Gerar Máscara</button>
+          <button type="button" id="btn-limpar" class="btn-secondary">🧹 Limpar</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Máscara gerada -->
+    <div class="mascara-wrapper">
+      <div class="mascara-header">
+        <span>📋 Máscara para copiar</span>
+        <button id="btn-copiar" class="btn-copiar">⎘ Copiar</button>
+      </div>
+      <textarea id="mascara-texto" readonly placeholder="A máscara aparecerá aqui após salvar o ticket..."></textarea>
+    </div>
+  </main>
+
+  <div id="alerta" class="alerta hidden"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="assets/js/supabase-config.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script>
+    guardPage(["admin_master","admin","editor"]).then(ctx => {
+      if (!ctx) return;
+    });
+  </script>
+  <script src="assets/js/form.js"></script>
+</body>
+</html>
