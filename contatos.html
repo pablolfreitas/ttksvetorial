@@ -3,23 +3,152 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Contatos</title>
+  <title>Contatos — TTKs Fibrasil</title>
   <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
   <header>
-    <h1>🎫 Sistema de Tickets</h1>
+    <h1>🔗 TTKs Fibrasil</h1>
     <nav>
       <a href="index.html" class="nav-btn">Abrir Ticket</a>
-      <a href="painel.html" class="nav-btn">📋 Painel</a>
-      <a href="encerrados.html" class="nav-btn">✅ Encerrados</a>
-      <a href="contatos.html" class="nav-btn active">📞 Contatos</a>
+      <a href="painel.html" class="nav-btn">Painel</a>
+      <a href="encerrados.html" class="nav-btn">Encerrados</a>
+      <a href="contatos.html" class="nav-btn active">Contatos</a>
+      <a href="logs.html" class="nav-btn">Logs</a>
     </nav>
   </header>
+
   <main class="container-wide">
-    <div class="pagina-construcao">
-      <h2>📞 Contatos</h2>
-      <p>Esta página está em desenvolvimento. Em breve você poderá consultar e gerenciar contatos da equipe aqui.</p>
+    <div class="contatos-page">
+
+      <!-- Regiões e siglas -->
+      <div class="contatos-col">
+        <h2 class="contatos-titulo">Regiões e Siglas</h2>
+
+        <div class="regioes-grid">
+          <div class="regiao-card">
+            <div class="regiao-card-header norte">NORTE</div>
+            <table class="regiao-table">
+              <tr><td>Carazinho</td><td>CIO</td></tr>
+              <tr><td>Cachoeira do Sul</td><td>CCR</td></tr>
+              <tr><td>Erechim</td><td>ERE</td></tr>
+              <tr><td>Palmeira das Missões</td><td>PMM</td></tr>
+              <tr><td>Santa Rosa</td><td>SRO</td></tr>
+              <tr><td>Santo Ângelo</td><td>SAN</td></tr>
+              <tr><td>Sarandi</td><td>SRD</td></tr>
+              <tr><td>Três de Maio</td><td>TMI</td></tr>
+            </table>
+          </div>
+
+          <div class="regiao-card">
+            <div class="regiao-card-header sul">SUL</div>
+            <table class="regiao-table">
+              <tr><td>Alegrete</td><td>ALG</td></tr>
+              <tr><td>Bagé</td><td>BGE</td></tr>
+              <tr><td>Camaquã</td><td>CAM</td></tr>
+              <tr><td>Santana do Livramento</td><td>SIV</td></tr>
+              <tr><td>Uruguaiana</td><td>UGN</td></tr>
+            </table>
+          </div>
+
+          <div class="regiao-card">
+            <div class="regiao-card-header taquari">TAQUARI</div>
+            <table class="regiao-table">
+              <tr><td>Charqueadas</td><td>CQU</td></tr>
+              <tr><td>Estrela</td><td>ETA</td></tr>
+              <tr><td>Lajeado</td><td>LJO</td></tr>
+              <tr><td>Teutônia</td><td>TUN</td></tr>
+              <tr><td>Venâncio Aires</td><td>VAI</td></tr>
+            </table>
+          </div>
+
+          <div class="regiao-card regiao-card-serra">
+            <div class="regiao-card-header serra">SERRA</div>
+            <table class="regiao-table">
+              <tr><td>Canela</td><td>CEN</td></tr>
+              <tr><td>Capão da Canoa</td><td>KDK</td></tr>
+              <tr><td>Carlos Barbosa</td><td>CLB</td></tr>
+              <tr><td>Dois Irmãos</td><td>DSR</td></tr>
+              <tr><td>Flores da Cunha</td><td>FCA</td></tr>
+              <tr><td>Garibaldi</td><td>GRD</td></tr>
+              <tr><td>Gramado</td><td>GDO</td></tr>
+              <tr><td>Igrejinha</td><td>IJH</td></tr>
+              <tr><td>Ivoti</td><td>IVO</td></tr>
+              <tr><td>Lagoa Vermelha</td><td>LVH</td></tr>
+              <tr><td>Nova Petrópolis</td><td>NVP</td></tr>
+              <tr><td>Osório</td><td>OSR</td></tr>
+              <tr><td>São Marcos</td><td>SCS</td></tr>
+              <tr><td>Taquara</td><td>TQR</td></tr>
+              <tr><td>Torres</td><td>TES</td></tr>
+              <tr><td>Tramandaí</td><td>TRI</td></tr>
+              <tr><td>Vacaria</td><td>VAA</td></tr>
+              <tr><td>Veranópolis</td><td>VNS</td></tr>
+              <tr><td>Xangri-lá</td><td>XNLA</td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Escalation -->
+      <div class="contatos-col">
+        <h2 class="contatos-titulo">Escalation</h2>
+
+        <div class="escalation-grid">
+          <div class="esc-card">
+            <div class="esc-header sul">Escalation SUL</div>
+            <table class="esc-table">
+              <thead><tr><th>Nome</th><th>Ramal</th><th>Celular</th></tr></thead>
+              <tbody>
+                <tr><td class="esc-plantao" colspan="3">Equipe plantão — Ver escala se existir</td></tr>
+                <tr><td>Delocir</td><td>53</td><td>999694917</td></tr>
+                <tr><td>Leonardo</td><td>55</td><td>999892154</td></tr>
+                <tr><td>Rômulo</td><td>55</td><td>999414282</td></tr>
+                <tr><td>Jeferson</td><td>54</td><td>984292120</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="esc-card">
+            <div class="esc-header norte">Escalation NORTE</div>
+            <table class="esc-table">
+              <thead><tr><th>Nome</th><th>Ramal</th><th>Celular</th></tr></thead>
+              <tbody>
+                <tr><td class="esc-plantao" colspan="3">Equipe plantão — Ver escala se existir</td></tr>
+                <tr><td>Leonardo</td><td>55</td><td>999892154</td></tr>
+                <tr><td>Rômulo</td><td>55</td><td>999414282</td></tr>
+                <tr><td>Jeferson</td><td>54</td><td>984292120</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="esc-card">
+            <div class="esc-header serra">Escalation SERRA</div>
+            <table class="esc-table">
+              <thead><tr><th>Nome</th><th>Ramal</th><th>Celular</th></tr></thead>
+              <tbody>
+                <tr><td class="esc-plantao" colspan="3">Equipe plantão — Ver escala se existir</td></tr>
+                <tr><td>Leonardo</td><td>55</td><td>999892154</td></tr>
+                <tr><td>Rômulo</td><td>55</td><td>999414282</td></tr>
+                <tr><td>Jeferson</td><td>54</td><td>984292120</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="esc-card">
+            <div class="esc-header taquari">Escalation TAQUARI</div>
+            <table class="esc-table">
+              <thead><tr><th>Nome</th><th>Ramal</th><th>Celular</th></tr></thead>
+              <tbody>
+                <tr><td class="esc-plantao" colspan="3">Equipe plantão — Ver escala se existir</td></tr>
+                <tr><td>Leonardo</td><td>55</td><td>999892154</td></tr>
+                <tr><td>Rômulo</td><td>55</td><td>999414282</td></tr>
+                <tr><td>Jeferson</td><td>54</td><td>984292120</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
     </div>
   </main>
 </body>
