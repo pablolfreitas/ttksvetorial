@@ -1,152 +1,216 @@
-// ===== painel.js =====
+// ===== painel.js — Supabase Auth + Realtime + modo visualização =====
 
-const ORDEM_REGIOES = ["NORTE", "SUL", "SERRA", "TAQUARI"];
-const USUARIO = "sistema"; // futuramente virá do login
+const ORDEM_REGIOES  = ['NORTE','SUL','SERRA','TAQUARI'];
+let todosTickets     = [];
+let ticketEditando   = null;
+let ticketDeletando  = null;
+let modoVisualizacao = false;
+let sb               = null;   // cliente Supabase
+let accessToken      = SUPABASE_KEY; // fallback anon
 
-let todosTickets = [];
-let ticketEditando = null;
-let ticketDeletando = null;
+// ═══════════════════════════════════════════════════════════
+// INICIALIZAÇÃO
+// ═══════════════════════════════════════════════════════════
+async function init() {
+  sb = getClient();
 
-// ===== FETCH =====
+  const params  = new URLSearchParams(window.location.search);
+  const session = await getSession();
+
+  if (params.get('modo') === 'visualizacao' || !session) {
+    // ── MODO VISUALIZAÇÃO ──────────────────────────────────
+    modoVisualizacao = true;
+    document.getElementById('banner-visualizacao')?.classList.remove('hidden');
+    document.getElementById('btn-logout')?.classList.add('hidden');
+    document.getElementById('usuario-nome').textContent = 'Visualização';
+    // Esconde Abrir Ticket e Logs
+    document.getElementById('nav-abrir')?.remove();
+    document.getElementById('nav-logs')?.remove();
+  } else {
+    // ── MODO AUTENTICADO ───────────────────────────────────
+    accessToken = session.access_token;
+    const role  = sessionStorage.getItem('fb_role') || '';
+    const nome  = sessionStorage.getItem('fb_nome') || session.user.email;
+    document.getElementById('usuario-nome').textContent = `${nome} · ${role}`;
+
+    // Esconde Logs para não-admin
+    if (!['admin_master','admin'].includes(role)) {
+      document.getElementById('nav-logs')?.remove();
+    }
+  }
+
+  await carregarTickets();
+  iniciarRealtime();
+}
+
+// ═══════════════════════════════════════════════════════════
+// FETCH — só campos necessários, sem select(*)
+// ═══════════════════════════════════════════════════════════
 async function carregarTickets() {
   try {
     const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/tickets?select=*&order=data_inicio.asc`,
-      { headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}` } }
+      `${SUPABASE_URL}/rest/v1/tickets?select=id,ttk,id_servico,sp,regiao,grupo_regiao,data_inicio,cidade,tag,atualizado_em&order=data_inicio.asc`,
+      { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${accessToken}` } }
     );
-    if (!res.ok) throw new Error("Erro ao buscar tickets");
+    if (!res.ok) throw new Error('Erro ao buscar tickets');
     todosTickets = await res.json();
     renderTabela();
     atualizarContadores();
-    const agora = new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
-    document.getElementById("ultima-atualizacao").textContent = "Atualizado às " + agora;
+    marcarAtualizado();
   } catch (err) {
-    document.getElementById("tabela-wrapper").innerHTML =
-      `<div class="loading" style="color:#e74c3c;">❌ ${err.message}<br><br>Verifique as credenciais no supabase-config.js</div>`;
+    document.getElementById('tabela-wrapper').innerHTML =
+      `<div class="loading" style="color:#e74c3c;">❌ ${err.message}</div>`;
   }
 }
 
-// ===== CONTADORES =====
+function marcarAtualizado() {
+  const agora = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  document.getElementById('ultima-atualizacao').textContent = 'Atualizado às ' + agora;
+}
+
+// ═══════════════════════════════════════════════════════════
+// REALTIME — substitui polling de 30s
+// ═══════════════════════════════════════════════════════════
+function iniciarRealtime() {
+  if (!sb) return;
+  const badge = document.getElementById('realtime-badge');
+
+  sb.channel('tickets-rt')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'tickets' }, payload => {
+      const { eventType, new: novo, old } = payload;
+      if      (eventType === 'INSERT') todosTickets.push(novo);
+      else if (eventType === 'UPDATE') {
+        const i = todosTickets.findIndex(t => t.id === novo.id);
+        if (i >= 0) todosTickets[i] = { ...todosTickets[i], ...novo };
+      }
+      else if (eventType === 'DELETE') todosTickets = todosTickets.filter(t => t.id !== old.id);
+      renderTabela();
+      atualizarContadores();
+      marcarAtualizado();
+    })
+    .subscribe(status => {
+      if (badge) {
+        badge.textContent = status === 'SUBSCRIBED' ? '● ao vivo' : '● reconectando';
+        badge.style.color = status === 'SUBSCRIBED' ? '#2ecc71'   : '#f39c12';
+      }
+    });
+
+  // Recalcula barras SLA a cada minuto sem ir ao banco
+  setInterval(() => { if (todosTickets.length) renderTabela(); }, 60000);
+}
+
+// ═══════════════════════════════════════════════════════════
+// CONTADORES
+// ═══════════════════════════════════════════════════════════
 function atualizarContadores() {
-  const total    = todosTickets.length;
-  const massiva  = todosTickets.filter(t => t.tag === "Massiva").length;
-  const pendencia = todosTickets.filter(t => t.tag === "Pendência Técnica").length;
-  document.getElementById("cnt-total").textContent    = total;
-  document.getElementById("cnt-massiva").textContent  = massiva;
-  document.getElementById("cnt-pendencia").textContent = pendencia;
+  document.getElementById('cnt-total').textContent    = todosTickets.length;
+  document.getElementById('cnt-massiva').textContent  = todosTickets.filter(t => t.tag === 'Massiva').length;
+  document.getElementById('cnt-pendencia').textContent = todosTickets.filter(t => t.tag === 'Pendência Técnica').length;
 }
 
-// ===== SLA =====
-function calcularSLA(ticket) {
-  if (!ticket.data_inicio) return null;
-  const limitHoras = ticket.tag === "Massiva" ? 8 : 24;
-  const inicio     = new Date(ticket.data_inicio);
-  const agora      = new Date();
-  const decorrido  = (agora - inicio) / (1000 * 60 * 60);
-  const pct        = Math.min(Math.round((decorrido / limitHoras) * 100), 100);
-  return { pct, limitHoras, decorrido: decorrido.toFixed(1) };
+// ═══════════════════════════════════════════════════════════
+// SLA
+// ═══════════════════════════════════════════════════════════
+function calcularSLA(t) {
+  if (!t.data_inicio) return null;
+  const lim       = t.tag === 'Massiva' ? 8 : 24;
+  const decorrido = (Date.now() - new Date(t.data_inicio)) / 3600000;
+  return { pct: Math.min(Math.round(decorrido / lim * 100), 100), lim, dec: decorrido.toFixed(1) };
 }
 
-function slaBar(ticket) {
-  const s = calcularSLA(ticket);
-  if (!s) return `<span style="color:var(--texto-dim);font-size:0.78rem;">—</span>`;
-  let cor;
-  if (s.pct < 50)      cor = "#2ecc71";
-  else if (s.pct < 80) cor = "#f39c12";
-  else                  cor = "#e74c3c";
-  return `
-    <div class="sla-wrap" title="${s.decorrido}h / ${s.limitHoras}h">
-      <div class="sla-bar-bg">
-        <div class="sla-bar-fill" style="width:${s.pct}%;background:${cor};box-shadow:0 0 6px ${cor}88;"></div>
-      </div>
-      <span class="sla-pct" style="color:${cor};">${s.pct}%</span>
-    </div>`;
+function slaBar(t) {
+  const s = calcularSLA(t);
+  if (!s) return `<span style="color:var(--texto-dim)">—</span>`;
+  const cor = s.pct < 50 ? '#2ecc71' : s.pct < 80 ? '#f39c12' : '#e74c3c';
+  return `<div class="sla-wrap" title="${s.dec}h / ${s.lim}h">
+    <div class="sla-bar-bg"><div class="sla-bar-fill" style="width:${s.pct}%;background:${cor};box-shadow:0 0 6px ${cor}88"></div></div>
+    <span class="sla-pct" style="color:${cor}">${s.pct}%</span></div>`;
 }
 
-// ===== RENDER =====
+// ═══════════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════════
 function renderTabela() {
+  // Coluna de ações não existe no modo visualização
+  const colAcao = modoVisualizacao ? '' : `<col style="width:70px">`;
+  const thAcao  = modoVisualizacao ? '' : `<th></th>`;
+
+  const COLS = `<colgroup>
+    <col style="width:155px"><col style="width:200px"><col style="width:60px">
+    <col><col style="width:130px"><col style="width:148px">
+    <col style="width:155px"><col style="width:138px">${colAcao}</colgroup>`;
+  const THEAD = `<thead><tr>
+    <th>TTKs</th><th>ID de Serviço</th><th>SP</th><th>Descrição</th>
+    <th>SLA</th><th>Cidade</th><th>TAG</th><th>Dat. Início</th>${thAcao}
+  </tr></thead>`;
+
+  const wrapper = document.getElementById('tabela-wrapper');
+  wrapper.innerHTML = '';
+
+  // Cabeçalho fixo único (sticky)
+  wrapper.insertAdjacentHTML('beforeend',
+    `<table class="tickets-table" style="margin-bottom:0;table-layout:fixed;width:100%">${COLS}${THEAD}</table>`);
+
   const grupos = {};
   ORDEM_REGIOES.forEach(r => { grupos[r] = []; });
   todosTickets.forEach(t => {
-    const grupo = (t.grupo_regiao || "SUL").toUpperCase();
-    if (!grupos[grupo]) grupos[grupo] = [];
-    grupos[grupo].push(t);
+    const g = (t.grupo_regiao || 'SUL').toUpperCase();
+    (grupos[g] = grupos[g] || []).push(t);
   });
 
-  const wrapper = document.getElementById("tabela-wrapper");
-  wrapper.innerHTML = "";
+  Object.entries(grupos).forEach(([reg, lista]) => {
+    const div    = document.createElement('div');
+    div.className = 'grupo-regiao';
 
-  const COLGROUP = `<colgroup>
-    <col style="width:155px"><col style="width:200px"><col style="width:60px">
-    <col><col style="width:130px"><col style="width:148px">
-    <col style="width:155px"><col style="width:138px"><col style="width:70px">
-  </colgroup>`;
-
-  const THEAD = `<thead><tr>
-    <th>TTKs</th><th>ID de Serviço</th><th>SP</th>
-    <th>Descrição</th><th>SLA</th><th>Cidade</th>
-    <th>TAG</th><th>Dat. Início</th><th></th>
-  </tr></thead>`;
-
-  wrapper.insertAdjacentHTML("beforeend",
-    `<table class="tickets-table" style="margin-bottom:0;table-layout:fixed;width:100%;">${COLGROUP}${THEAD}</table>`);
-
-  Object.entries(grupos).forEach(([nomeGrupo, lista]) => {
-    const div = document.createElement("div");
-    div.className = "grupo-regiao";
-
-    const titulo = document.createElement("div");
-    titulo.className = "grupo-titulo";
-    titulo.textContent = nomeGrupo;
+    const titulo  = document.createElement('div');
+    titulo.className = 'grupo-titulo';
+    titulo.textContent = reg;
     div.appendChild(titulo);
 
-    const table = document.createElement("table");
-    table.className = "tickets-table";
-    table.style.cssText = "table-layout:fixed;width:100%;";
-    table.innerHTML = `<colgroup>
-      <col style="width:155px"><col style="width:200px"><col style="width:60px">
-      <col><col style="width:130px"><col style="width:148px">
-      <col style="width:155px"><col style="width:138px"><col style="width:70px">
-    </colgroup>`;
+    const table  = document.createElement('table');
+    table.className = 'tickets-table';
+    table.style.cssText = 'table-layout:fixed;width:100%';
+    table.innerHTML = COLS;
 
-    const tbody = document.createElement("tbody");
+    const tbody = document.createElement('tbody');
 
-    if (lista.length === 0) {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `<td colspan="9" class="sem-tickets">—</td>`;
-      tbody.appendChild(tr);
+    if (!lista.length) {
+      tbody.innerHTML = `<tr><td colspan="${modoVisualizacao?8:9}" class="sem-tickets">—</td></tr>`;
     } else {
       lista.forEach(t => {
-        const tagClass   = t.tag === "Massiva" ? "tag-Massiva" : "tag-pendencia";
-        const dataInicio = t.data_inicio ? formatarData(t.data_inicio) : "—";
-        const descHtml   = (t.regiao || "—");
-        const spVal      = t.sp || "—";
-        const spClass    = spVal.split(",").length >= 3 ? "cell-sp cell-sp-wrap" : "cell-sp";
-        const atualizadoHora = t.atualizado_em
-          ? new Date(t.atualizado_em).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })
-          : "";
+        const tagCls  = t.tag === 'Massiva' ? 'tag-Massiva' : 'tag-pendencia';
+        const spVal   = t.sp || '—';
+        const spCls   = spVal.split(',').length >= 3 ? 'cell-sp cell-sp-wrap' : 'cell-sp';
+        const atu     = t.atualizado_em
+          ? new Date(t.atualizado_em).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})
+          : '';
+        const desc    = (t.regiao || '—');
 
-        const tr = document.createElement("tr");
+        // Botões apenas para usuários autenticados
+        const btnEditar = modoVisualizacao ? '' :
+          `<button class="btn-edit-desc" data-id="${t.id}">Editar</button>`;
+        const tdAcao    = modoVisualizacao ? '' :
+          `<td class="cell-acoes"><button class="btn-delete" data-id="${t.id}" data-ttk="${t.ttk}">🗑</button></td>`;
+
+        const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td class="cell-mono cell-center">${t.ttk || "—"}</td>
-          <td class="cell-mono cell-center">${t.id_servico || "—"}</td>
-          <td class="${spClass}">${spVal}</td>
+          <td class="cell-mono cell-center">${t.ttk||'—'}</td>
+          <td class="cell-mono cell-center">${t.id_servico||'—'}</td>
+          <td class="${spCls}">${spVal}</td>
           <td class="col-descricao">
             <div class="desc-inner">
-              <span class="descricao-texto" title="${descHtml.replace(/"/g,"'")}">${descHtml}</span>
+              <span class="descricao-texto" title="${desc.replace(/"/g,"'")}">${desc}</span>
               <div class="desc-footer">
-                <span class="atualizado-label">${atualizadoHora ? "atualizado às " + atualizadoHora : ""}</span>
-                <button class="btn-edit-desc" data-id="${t.id}" title="Editar descrição">Editar</button>
+                <span class="atualizado-label">${atu ? 'atualizado às '+atu : ''}</span>
+                ${btnEditar}
               </div>
             </div>
           </td>
           <td>${slaBar(t)}</td>
-          <td class="cell-center">${t.cidade || "—"}</td>
-          <td class="cell-center"><span class="tag-badge ${tagClass}">${t.tag || "—"}</span></td>
-          <td class="cell-center">${dataInicio}</td>
-          <td class="cell-acoes">
-            <button class="btn-delete" data-id="${t.id}" data-ttk="${t.ttk}" title="Remover">🗑</button>
-          </td>`;
+          <td class="cell-center">${t.cidade||'—'}</td>
+          <td class="cell-center"><span class="tag-badge ${tagCls}">${t.tag||'—'}</span></td>
+          <td class="cell-center">${t.data_inicio ? fmtData(t.data_inicio) : '—'}</td>
+          ${tdAcao}`;
         tbody.appendChild(tr);
       });
     }
@@ -156,185 +220,141 @@ function renderTabela() {
     wrapper.appendChild(div);
   });
 
-  wrapper.querySelectorAll(".btn-edit-desc").forEach(btn => {
-    btn.addEventListener("click", () => abrirModalDescricao(btn.dataset.id));
-  });
-  wrapper.querySelectorAll(".btn-delete").forEach(btn => {
-    btn.addEventListener("click", () => abrirModalDelete(btn.dataset.id, btn.dataset.ttk));
-  });
+  // Eventos — só quando não é visualização
+  if (!modoVisualizacao) {
+    wrapper.querySelectorAll('.btn-edit-desc').forEach(b =>
+      b.addEventListener('click', () => abrirModalDesc(b.dataset.id)));
+    wrapper.querySelectorAll('.btn-delete').forEach(b =>
+      b.addEventListener('click', () => abrirModalDel(b.dataset.id, b.dataset.ttk)));
+  }
 }
 
-// ===== FORMATAÇÃO =====
-function formatarData(iso) {
-  if (!iso) return "—";
+// ═══════════════════════════════════════════════════════════
+// UTILIDADES
+// ═══════════════════════════════════════════════════════════
+function fmtData(iso) {
   const d = new Date(iso);
-  const dia  = d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
-  const hora = d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
-  return `${dia} ${hora}`;
+  return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}) + ' ' +
+    d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
 }
 
-// ===== LOG =====
-async function registrarLog(acao, ttk, detalhe = "") {
-  try {
-    await fetch(`${SUPABASE_URL}/rest/v1/logs`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "apikey": SUPABASE_KEY,
-        "Authorization": `Bearer ${SUPABASE_KEY}`,
-        "Prefer": "return=minimal"
-      },
-      body: JSON.stringify({ acao, ttk, detalhe, usuario: USUARIO })
-    });
-  } catch (e) { console.warn("Log falhou:", e); }
+function hdrs(extra = {}) {
+  return { 'Content-Type':'application/json', apikey: SUPABASE_KEY,
+    Authorization: `Bearer ${accessToken}`, Prefer:'return=minimal', ...extra };
 }
 
-// ===== MODAL EDITAR =====
-function abrirModalDescricao(id) {
+async function log(acao, ttk, detalhe = '') {
+  const usuario = sessionStorage.getItem('fb_nome') || 'sistema';
+  fetch(`${SUPABASE_URL}/rest/v1/logs`, {
+    method:'POST', headers: hdrs(),
+    body: JSON.stringify({ acao, ttk, detalhe, usuario })
+  }).catch(() => {});
+}
+
+function alerta(msg, erro = false) {
+  const el = document.getElementById('alerta');
+  el.textContent = msg;
+  el.className = 'alerta' + (erro ? ' erro' : '');
+  el.classList.remove('hidden');
+  setTimeout(() => el.classList.add('hidden'), 4000);
+}
+
+// ═══════════════════════════════════════════════════════════
+// MODAL EDITAR
+// ═══════════════════════════════════════════════════════════
+function abrirModalDesc(id) {
   ticketEditando = todosTickets.find(t => t.id == id);
   if (!ticketEditando) return;
-  document.getElementById("modal-ttk").textContent = ticketEditando.ttk;
-  document.getElementById("modal-texto").value = ticketEditando.regiao || "";
-  document.getElementById("modal-regiao").classList.remove("hidden");
-  document.getElementById("modal-texto").focus();
+  document.getElementById('modal-ttk').textContent = ticketEditando.ttk;
+  document.getElementById('modal-texto').value     = ticketEditando.regiao || '';
+  document.getElementById('modal-regiao').classList.remove('hidden');
 }
-
-document.getElementById("modal-cancelar").addEventListener("click", () => {
-  document.getElementById("modal-regiao").classList.add("hidden");
+document.getElementById('modal-cancelar').addEventListener('click', () => {
+  document.getElementById('modal-regiao').classList.add('hidden');
   ticketEditando = null;
 });
-
-document.getElementById("modal-salvar").addEventListener("click", async () => {
+document.getElementById('modal-salvar').addEventListener('click', async () => {
   if (!ticketEditando) return;
-  const novoTexto = document.getElementById("modal-texto").value.trim();
-  const btn = document.getElementById("modal-salvar");
+  const txt = document.getElementById('modal-texto').value.trim();
+  const btn = document.getElementById('modal-salvar');
   btn.disabled = true;
   try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/tickets?id=eq.${ticketEditando.id}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        "apikey": SUPABASE_KEY,
-        "Authorization": `Bearer ${SUPABASE_KEY}`,
-        "Prefer": "return=minimal"
-      },
-      body: JSON.stringify({ regiao: novoTexto, atualizado_em: new Date().toISOString() })
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/tickets?id=eq.${ticketEditando.id}`, {
+      method:'PATCH', headers: hdrs(),
+      body: JSON.stringify({ regiao: txt, atualizado_em: new Date().toISOString() })
     });
-    if (!res.ok) throw new Error("Erro ao atualizar");
-    await registrarLog("EDIÇÃO", ticketEditando.ttk, "Descrição atualizada");
-    const idx = todosTickets.findIndex(t => t.id == ticketEditando.id);
-    if (idx >= 0) {
-      todosTickets[idx].regiao = novoTexto;
-      todosTickets[idx].atualizado_em = new Date().toISOString();
-    }
-    document.getElementById("modal-regiao").classList.add("hidden");
+    if (!r.ok) throw new Error('Erro ao salvar');
+    log('EDIÇÃO', ticketEditando.ttk, 'Descrição atualizada');
+    document.getElementById('modal-regiao').classList.add('hidden');
     ticketEditando = null;
-    renderTabela();
-    mostrarAlerta("✅ Descrição atualizada!");
-  } catch (err) {
-    mostrarAlerta("❌ " + err.message, true);
-  } finally { btn.disabled = false; }
+    alerta('✅ Descrição atualizada!');
+  } catch(e) { alerta('❌ ' + e.message, true); }
+  finally { btn.disabled = false; }
 });
 
-// ===== MODAL DELETAR/ENCERRAR =====
-function abrirModalDelete(id, ttk) {
+// ═══════════════════════════════════════════════════════════
+// MODAL DELETE / ENCERRAR
+// ═══════════════════════════════════════════════════════════
+function abrirModalDel(id, ttk) {
   ticketDeletando = id;
-  document.getElementById("delete-ttk").textContent = ttk;
-  document.getElementById("modal-delete").classList.remove("hidden");
+  document.getElementById('delete-ttk').textContent = ttk;
+  document.getElementById('modal-delete').classList.remove('hidden');
 }
-
-document.getElementById("delete-cancelar").addEventListener("click", () => {
-  document.getElementById("modal-delete").classList.add("hidden");
+document.getElementById('delete-cancelar').addEventListener('click', () => {
+  document.getElementById('modal-delete').classList.add('hidden');
   ticketDeletando = null;
 });
 
-// Botão: Finalizado pela equipe → salva em encerrados e deleta do painel
-document.getElementById("delete-finalizar").addEventListener("click", async () => {
+// Finalizar → salva em encerrados
+document.getElementById('delete-finalizar').addEventListener('click', async () => {
   if (!ticketDeletando) return;
-  const btn = document.getElementById("delete-finalizar");
+  const btn = document.getElementById('delete-finalizar');
   btn.disabled = true;
-  const ticket = todosTickets.find(t => t.id == ticketDeletando);
-  const sla = ticket ? calcularSLA(ticket) : null;
-
+  const t   = todosTickets.find(x => x.id == ticketDeletando);
+  const sla = t ? calcularSLA(t) : null;
   try {
-    // 1. Salva em encerrados
-    if (ticket) {
+    if (t) {
       await fetch(`${SUPABASE_URL}/rest/v1/encerrados`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "apikey": SUPABASE_KEY,
-          "Authorization": `Bearer ${SUPABASE_KEY}`,
-          "Prefer": "return=minimal"
-        },
+        method:'POST', headers: hdrs(),
         body: JSON.stringify({
-          ttk:         ticket.ttk,
-          id_servico:  ticket.id_servico,
-          cidade:      ticket.cidade,
-          tag:         ticket.tag,
-          sla_pct:     sla ? sla.pct : null,
-          sla_horas:   sla ? `${sla.decorrido}h / ${sla.limitHoras}h` : null,
-          data_inicio: ticket.data_inicio,
-          usuario:     USUARIO
+          ttk: t.ttk, id_servico: t.id_servico, cidade: t.cidade, tag: t.tag,
+          sla_pct: sla?.pct ?? null,
+          sla_horas: sla ? `${sla.dec}h / ${sla.lim}h` : null,
+          data_inicio: t.data_inicio,
+          usuario: sessionStorage.getItem('fb_nome') || 'sistema'
         })
       });
     }
-
-    // 2. Deleta do painel
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/tickets?id=eq.${ticketDeletando}`, {
-      method: "DELETE",
-      headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}` }
-    });
-    if (!res.ok) throw new Error("Erro ao remover ticket");
-
-    // 3. Registra log
-    await registrarLog("ENCERRADO", ticket?.ttk, `SLA: ${sla ? sla.pct + "%" : "—"}`);
-
-    todosTickets = todosTickets.filter(t => t.id != ticketDeletando);
-    document.getElementById("modal-delete").classList.add("hidden");
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/tickets?id=eq.${ticketDeletando}`,
+      { method:'DELETE', headers: hdrs() });
+    if (!r.ok) throw new Error('Erro ao remover');
+    log('ENCERRADO', t?.ttk, `SLA: ${sla ? sla.pct+'%' : '—'}`);
+    document.getElementById('modal-delete').classList.add('hidden');
     ticketDeletando = null;
-    renderTabela();
-    atualizarContadores();
-    mostrarAlerta("✅ Ticket finalizado e salvo em Encerrados.");
-  } catch (err) {
-    mostrarAlerta("❌ " + err.message, true);
-  } finally { btn.disabled = false; }
+    alerta('✅ Ticket finalizado e salvo em Encerrados.');
+  } catch(e) { alerta('❌ ' + e.message, true); }
+  finally { btn.disabled = false; }
 });
 
-// Botão: Deletar do painel (sem salvar)
-document.getElementById("delete-confirmar").addEventListener("click", async () => {
+// Deletar sem salvar
+document.getElementById('delete-confirmar').addEventListener('click', async () => {
   if (!ticketDeletando) return;
-  const btn = document.getElementById("delete-confirmar");
+  const btn = document.getElementById('delete-confirmar');
   btn.disabled = true;
-  const ticket = todosTickets.find(t => t.id == ticketDeletando);
+  const t = todosTickets.find(x => x.id == ticketDeletando);
   try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/tickets?id=eq.${ticketDeletando}`, {
-      method: "DELETE",
-      headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}` }
-    });
-    if (!res.ok) throw new Error("Erro ao deletar");
-    await registrarLog("DELETE", ticket?.ttk, "Removido sem encerrar");
-    todosTickets = todosTickets.filter(t => t.id != ticketDeletando);
-    document.getElementById("modal-delete").classList.add("hidden");
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/tickets?id=eq.${ticketDeletando}`,
+      { method:'DELETE', headers: hdrs() });
+    if (!r.ok) throw new Error('Erro ao deletar');
+    log('DELETE', t?.ttk, 'Removido sem encerrar');
+    document.getElementById('modal-delete').classList.add('hidden');
     ticketDeletando = null;
-    renderTabela();
-    atualizarContadores();
-    mostrarAlerta("🗑️ Ticket removido do painel.");
-  } catch (err) {
-    mostrarAlerta("❌ " + err.message, true);
-  } finally { btn.disabled = false; }
+    alerta('🗑️ Ticket removido.');
+  } catch(e) { alerta('❌ ' + e.message, true); }
+  finally { btn.disabled = false; }
 });
 
-// ===== ALERTA =====
-function mostrarAlerta(msg, erro = false) {
-  const el = document.getElementById("alerta");
-  el.textContent = msg;
-  el.className = "alerta" + (erro ? " erro" : "");
-  el.classList.remove("hidden");
-  setTimeout(() => el.classList.add("hidden"), 4000);
-}
-
-document.getElementById("btn-atualizar").addEventListener("click", carregarTickets);
-setInterval(() => { if (todosTickets.length) renderTabela(); }, 60000);
-carregarTickets();
-setInterval(carregarTickets, 30000);
+// ═══════════════════════════════════════════════════════════
+// START
+// ═══════════════════════════════════════════════════════════
+init();
