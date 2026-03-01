@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login — TTKs Fibrasil</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body class="login-body">
+
+  <div class="login-bg"></div>
+
+  <div class="login-wrapper">
+
+    <!-- Counter de TTKs ao vivo -->
+    <div class="login-counter">
+      <span class="login-counter-valor" id="ttk-total">—</span>
+      <span class="login-counter-label">TTKs ativos</span>
+    </div>
+
+    <div class="login-card">
+      <div class="login-logo">🔗</div>
+      <h1 class="login-title">TTKs Fibrasil</h1>
+      <p class="login-sub">Acesse sua conta para continuar</p>
+
+      <div id="login-erro" class="login-msg erro hidden"></div>
+      <div id="login-ok"   class="login-msg ok   hidden"></div>
+
+      <!-- FORMULÁRIO LOGIN -->
+      <div id="form-login">
+        <div class="login-field">
+          <label>E-mail</label>
+          <input type="email" id="l-email" placeholder="seu@email.com" autocomplete="email">
+        </div>
+        <div class="login-field">
+          <label>Senha</label>
+          <div class="input-eye">
+            <input type="password" id="l-senha" placeholder="••••••••••" maxlength="20">
+            <button type="button" class="eye-btn" id="eye-login">👁</button>
+          </div>
+        </div>
+        <button class="btn-login" id="btn-entrar">Entrar</button>
+        <div class="login-links">
+          <a href="#" id="link-esqueci">Esqueci minha senha</a>
+        </div>
+        <div class="login-divider">ou</div>
+        <a href="painel.html?modo=visualizacao" class="btn-visualizar">👁 Visualizar TTKs</a>
+      </div>
+
+      <!-- FORMULÁRIO ESQUECI SENHA -->
+      <div id="form-esqueci" class="hidden">
+        <p style="font-size:0.88rem;color:var(--texto-dim);margin-bottom:14px;">Informe seu e-mail para receber sua senha.</p>
+        <div class="login-field">
+          <label>E-mail</label>
+          <input type="email" id="e-email" placeholder="seu@email.com">
+        </div>
+        <button class="btn-login" id="btn-esqueci">Enviar senha</button>
+        <div class="login-links"><a href="#" id="link-voltar-login">← Voltar ao login</a></div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="assets/js/supabase-config.js"></script>
+  <script src="assets/js/auth.js"></script>
+</body>
+</html>
