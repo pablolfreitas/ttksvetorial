@@ -10,15 +10,27 @@
   <header>
     <h1>🔗 TTKs Fibrasil</h1>
     <nav>
-      <a href="index.html" class="nav-btn">Abrir Ticket</a>
-      <a href="painel.html" class="nav-btn active">📋 Painel</a>
-      <a href="encerrados.html" class="nav-btn">✅ Encerrados</a>
-      <a href="contatos.html" class="nav-btn">📞 Contatos</a>
-      <a href="logs.html" class="nav-btn">📄 Logs</a>
+      <a href="form.html" class="nav-btn" id="nav-abrir">Abrir Ticket</a>
+      <a href="painel.html" class="nav-btn active">Painel</a>
+      <a href="encerrados.html" class="nav-btn">Encerrados</a>
+      <a href="contatos.html" class="nav-btn">Contatos</a>
+      <a href="logs.html" class="nav-btn" id="nav-logs">Logs</a>
     </nav>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span id="usuario-nome" style="font-size:0.8rem;color:rgba(255,255,255,0.6);"></span>
+      <button onclick="logout()" class="btn-secondary" style="padding:5px 12px;font-size:0.8rem;" id="btn-logout">Sair</button>
+    </div>
   </header>
 
   <main class="container-wide">
+    <!-- Banner modo visualização -->
+    <div id="banner-visualizacao" class="hidden" style="
+      background:rgba(74,144,217,0.12);border:1px solid var(--azul-borda);
+      border-radius:8px;padding:10px 18px;margin-bottom:14px;
+      font-size:0.88rem;color:var(--azul-claro);text-align:center;">
+      👁 Modo visualização — edição desativada. <a href="index.html" style="color:var(--azul-claro);margin-left:8px;">Fazer login →</a>
+    </div>
+
     <div class="painel-header">
       <div class="contadores">
         <div class="contador-item">
@@ -37,14 +49,12 @@
         </div>
       </div>
       <div class="painel-acoes">
-        <button id="btn-atualizar" class="btn-secondary">🔄 Atualizar</button>
+        <span id="realtime-badge" style="font-size:0.75rem;color:#2ecc71;opacity:0.8;">● ao vivo</span>
         <span id="ultima-atualizacao" class="info-text"></span>
       </div>
     </div>
 
-    <div id="tabela-wrapper">
-      <div class="loading">Carregando tickets...</div>
-    </div>
+    <div id="tabela-wrapper"><div class="loading">Carregando tickets...</div></div>
   </main>
 
   <!-- Modal editar descrição -->
@@ -60,22 +70,20 @@
     </div>
   </div>
 
-  <!-- Modal remover ticket — dois botões -->
+  <!-- Modal remover ticket -->
   <div id="modal-delete" class="modal hidden">
     <div class="modal-content">
       <h3>Remover Ticket</h3>
       <p class="modal-info" style="margin-bottom:16px;">TTK: <strong id="delete-ttk"></strong></p>
       <div class="delete-opcoes">
         <button id="delete-finalizar" class="btn-finalizar">
-          ✅ Finalizado pela equipe<br>
-          <small>Salvar nos Encerrados</small>
+          ✅ Finalizado pela equipe<br><small>Salvar nos Encerrados</small>
         </button>
         <button id="delete-confirmar" class="btn-danger btn-deletar">
-          🗑 Deletar do Painel<br>
-          <small>Sem salvar histórico</small>
+          🗑 Deletar do Painel<br><small>Sem salvar histórico</small>
         </button>
       </div>
-      <div style="margin-top:14px; text-align:right;">
+      <div style="margin-top:14px;text-align:right;">
         <button id="delete-cancelar" class="btn-secondary">Cancelar</button>
       </div>
     </div>
@@ -83,7 +91,9 @@
 
   <div id="alerta" class="alerta hidden"></div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="assets/js/supabase-config.js"></script>
+  <script src="assets/js/auth.js"></script>
   <script src="assets/js/painel.js"></script>
 </body>
 </html>
