@@ -370,11 +370,57 @@ select option { background: var(--bg3); }
 .tag-pendencia { background: var(--tag-pendencia); }
 
 .btn-delete {
-  background: none; border: 1px solid rgba(224,82,82,0.2);
-  color: rgba(224,82,82,0.55); border-radius: 4px;
-  padding: 2px 7px; font-size: 0.75rem; cursor: pointer; transition: all 0.15s;
+  background: none;
+  border: none;
+  color: rgba(224,82,82,0.5);
+  padding: 4px 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  border-radius: 4px;
+  line-height: 1;
 }
-.btn-delete:hover { background: rgba(224,82,82,0.1); border-color: var(--danger); color: var(--danger); }
+.btn-delete:hover { color: var(--danger); background: rgba(224,82,82,0.1); }
+
+.cell-acoes { text-align: center; padding: 0 8px !important; }
+
+/* Modal delete — dois botões grandes */
+.delete-opcoes {
+  display: flex;
+  gap: 12px;
+}
+.btn-finalizar, .btn-deletar {
+  flex: 1;
+  padding: 14px 16px;
+  border-radius: 8px;
+  border: none;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+  line-height: 1.5;
+  text-align: center;
+}
+.btn-finalizar {
+  background: rgba(46,204,113,0.15);
+  color: #2ecc71;
+  border: 1px solid rgba(46,204,113,0.4);
+}
+.btn-finalizar:hover { background: rgba(46,204,113,0.25); box-shadow: 0 0 12px rgba(46,204,113,0.2); }
+.btn-deletar {
+  background: rgba(224,82,82,0.12);
+  color: var(--danger);
+  border: 1px solid rgba(224,82,82,0.35);
+}
+.btn-deletar:hover { background: rgba(224,82,82,0.22); }
+.btn-finalizar small, .btn-deletar small {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 400;
+  opacity: 0.75;
+  margin-top: 2px;
+}
 
 .sem-tickets { text-align: center; padding: 14px; color: var(--texto-dim); font-size: 0.85rem; font-style: italic; }
 
