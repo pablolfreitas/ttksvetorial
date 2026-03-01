@@ -251,14 +251,20 @@ select option { background: var(--bg3); }
   border-bottom: 1px solid var(--borda);
 }
 
-/* Altura uniforme em todas as células */
+/* Altura uniforme FIXA em todas as linhas — nada cresce além disso */
+.tickets-table tbody tr {
+  height: 68px;
+  max-height: 68px;
+}
 .tickets-table td {
-  height: var(--row-height);
+  height: 68px;
+  max-height: 68px;
   padding: 0 12px;
   border-bottom: 1px solid rgba(46,74,122,0.7);
   vertical-align: middle;
   text-align: center;
   line-height: 1.45;
+  overflow: hidden;
 }
 
 .tickets-table tbody tr:nth-child(even) td { background: var(--zebra); }
@@ -272,33 +278,43 @@ select option { background: var(--bg3); }
 /* ===== COLUNA DESCRIÇÃO ===== */
 .col-descricao {
   text-align: left;
-  position: relative;
+  padding: 0 !important;   /* remove padding da td para controlar internamente */
 }
-/* layout interno: coluna flex com texto e footer */
+/* container interno ocupa exatamente a altura da célula */
 .desc-inner {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  height: 100%;
-  gap: 2px;
+  justify-content: space-between;
+  height: 68px;
+  padding: 8px 12px 6px 12px;
+  box-sizing: border-box;
 }
+/* área de texto: altura fixa, corta o que ultrapassar */
 .descricao-texto {
   display: block;
+  overflow: hidden;
+  /* Limita a 2 linhas com reticências */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   word-break: break-word;
-  line-height: 1.45;
+  line-height: 1.4;
   text-align: left;
+  font-size: 0.9rem;
+  max-height: 2.8em;    /* 2 linhas × 1.4 */
 }
+/* rodapé sempre fixo na parte de baixo */
 .desc-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 3px;
+  flex-shrink: 0;
 }
 .atualizado-label {
-  font-size: 0.68rem;
+  font-size: 0.67rem;
   color: var(--texto-dim);
   font-style: italic;
-  opacity: 0.7;
+  opacity: 0.65;
   white-space: nowrap;
 }
 .btn-edit-desc {
