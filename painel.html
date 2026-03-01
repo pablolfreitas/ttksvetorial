@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Painel de Tickets</title>
+  <title>Painel — TTKs Fibrasil</title>
   <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
@@ -20,7 +20,6 @@
 
   <main class="container-wide">
     <div class="painel-header">
-      <!-- Contadores centrais -->
       <div class="contadores">
         <div class="contador-item">
           <span class="contador-valor" id="cnt-total">0</span>
@@ -37,8 +36,6 @@
           <span class="contador-label">Pendência Téc.</span>
         </div>
       </div>
-
-      <!-- Botão + horário à direita -->
       <div class="painel-acoes">
         <button id="btn-atualizar" class="btn-secondary">🔄 Atualizar</button>
         <span id="ultima-atualizacao" class="info-text"></span>
@@ -53,7 +50,7 @@
   <!-- Modal editar descrição -->
   <div id="modal-regiao" class="modal hidden">
     <div class="modal-content">
-      <h3>✏️ Editar Descrição</h3>
+      <h3>Editar Descrição</h3>
       <p class="modal-info">TTK: <strong id="modal-ttk"></strong></p>
       <textarea id="modal-texto" rows="4" placeholder="Informe a situação atual..."></textarea>
       <div class="modal-actions">
@@ -63,13 +60,22 @@
     </div>
   </div>
 
-  <!-- Modal confirmar exclusão -->
+  <!-- Modal remover ticket — dois botões -->
   <div id="modal-delete" class="modal hidden">
     <div class="modal-content">
-      <h3>🗑️ Confirmar exclusão</h3>
-      <p>Deseja apagar o ticket <strong id="delete-ttk"></strong>?</p>
-      <div class="modal-actions">
-        <button id="delete-confirmar" class="btn-danger">Apagar</button>
+      <h3>Remover Ticket</h3>
+      <p class="modal-info" style="margin-bottom:16px;">TTK: <strong id="delete-ttk"></strong></p>
+      <div class="delete-opcoes">
+        <button id="delete-finalizar" class="btn-finalizar">
+          ✅ Finalizado pela equipe<br>
+          <small>Salvar nos Encerrados</small>
+        </button>
+        <button id="delete-confirmar" class="btn-danger btn-deletar">
+          🗑 Deletar do Painel<br>
+          <small>Sem salvar histórico</small>
+        </button>
+      </div>
+      <div style="margin-top:14px; text-align:right;">
         <button id="delete-cancelar" class="btn-secondary">Cancelar</button>
       </div>
     </div>
